@@ -9,7 +9,8 @@ import axios from 'axios'
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
-Vue.prototype.$axios = axios
+axios.defaults.baseURL = 'http://localhost:8000/api/';
+Vue.prototype.$axios = axios // 将axios挂载到Vue的原型上，这样所有组件都可以使用this.$axios访问axios
 
 /* eslint-disable no-new */
 new Vue({
