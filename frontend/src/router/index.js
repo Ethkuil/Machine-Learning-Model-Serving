@@ -15,23 +15,35 @@ const routes = [
     meta: { title: '首页' }
   },
   {
-    path: '/deploy',
-    name: 'deploy',
+    path: '/deploys',
     component: () => import('@/views/Deploy'),
+    name: 'deploys',
     meta: { title: '部署' }
   },
   {
-    path: '/model',
-    name: 'model',
+    path: '/deploys/:id',
+    name: 'deployDetail',
+    component: () => import('@/views/DeployDetail'),
+    meta: { title: '部署详情' }
+  },
+  {
+    path: '/models',
+    name: 'models',
     component: () => import('@/views/Model'),
-    meta: { title: '模型' }
-  }
-  // {
-  //   path: '/deploy/:id',
-  //   name: 'deploy-detail',
-  //   component: () => import('@/views/DeployDetail'),
-  //   meta: { title: '部署详情' }
-  // },
+    meta: { title: '模型' },
+  },
+  {
+    path: '/models/:id',
+    name: 'modelDetail',
+    component: () => import('@/views/ModelDetail'),
+    meta: { title: '模型详情' }
+  },
+  {
+    path: '/datasets',
+    name: 'datasets',
+    component: () => import('@/views/Dataset'),
+    meta: { title: '数据集' }
+  },
 ]
 const router = new Router({
   routes,

@@ -26,6 +26,11 @@ export default {
 </script>
 
 <style>
+#app {
+  width: calc(min(100vw, 1200px));
+  /* 响应式布局 */
+}
+
 #header {
   background-color: #00152a;
   display: flex;
