@@ -1,0 +1,71 @@
+<template>
+  <div>
+    <TheTabs />
+    <el-main class="main">
+      <el-card>
+        <el-row slot="header" type="flex" justify="space-between" align="middle">
+          <h3 class="title">{{ title }}</h3>
+          <el-row type="flex">
+            <el-button icon="el-icon-plus" @click="addService">添加部署</el-button>
+            <el-input v-model="search" placeholder="搜索部署名" suffix-icon="el-icon-search" style="margin-left: 20px">
+            </el-input>
+          </el-row>
+        </el-row>
+
+        <DeployTable :data="tableData.filter(data => data.name.includes(search))" />
+      </el-card>
+    </el-main>
+  </div>
+</template>
+<script>
+import TheTabs from '../components/TheTabs.vue'
+import DeployTable from '../components/tables/DeployTable.vue'
+export default {
+  components: { TheTabs, DeployTable },
+  data() {
+    return {
+      title: this.$route.meta && this.$route.meta.title,
+      search: '',
+      tableData: [
+        {
+          id: 1,
+          name: '部署1',
+          type: 'PMML',
+          date: '2017-01-15',
+          state: '运行中'
+        },
+        {
+          id: 2,
+          name: '部署2',
+          type: 'ONNX',
+          date: '2018-01-03',
+          state: '运行中'
+        },
+        {
+          id: 3,
+          name: '部署3',
+          type: 'PMML',
+          date: '2019-06-01',
+          state: '运行中'
+        },
+      ]
+    }
+  },
+  methods: {
+    addService() {
+      this.$message({
+        message: '请选择所需模型',
+        type: 'info'
+      })
+      this.$router.push({
+        name: 'models'
+      })
+    }
+  }
+}
+</script>
+<style scoped>
+.main {
+  background-color: #f1f2f6
+}
+</style>

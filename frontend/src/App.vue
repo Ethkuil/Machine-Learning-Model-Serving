@@ -1,23 +1,45 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <router-view/>
+    <el-header id="header">
+      <h1>{{ title }}</h1>
+    </el-header>
+    <router-view />
+    <el-footer id="footer">
+      <FooterCopyright />
+    </el-footer>
   </div>
 </template>
 
 <script>
+import FooterCopyright from './components/FooterCopyright.vue'
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    FooterCopyright
+  },
+  data() {
+    return {
+      title: '机器学习模型服务',
+    }
+  },
 }
 </script>
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  width: calc(min(100vw, 1200px));
+  /* 响应式布局 */
+}
+
+#header {
+  background-color: #00152a;
+  display: flex;
+  align-items: center;
+  color: #B2C7CF;
+}
+
+#footer {
+  padding-left: 0;
+  padding-right: 0;
 }
 </style>
