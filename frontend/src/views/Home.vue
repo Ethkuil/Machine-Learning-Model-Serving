@@ -31,5 +31,6 @@ export default {
 <style scoped>
 .main {
   background-color: #f1f2f6;
+  height: calc(100vh - 186px);
 }
 </style>

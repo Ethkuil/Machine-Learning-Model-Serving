@@ -6,14 +6,6 @@
         <el-input v-model="form.name"></el-input>
       </el-form-item>
 
-      <el-form-item label="URL">
-        <el-input v-model="form.url" :disabled="true"></el-input>
-      </el-form-item>
-
-      <el-form-item label="网络服务运行环境">
-        <el-input v-model="form.environment" :disabled="true"></el-input>
-      </el-form-item>
-
       <el-form-item label="预留CPU" prop="cpu">
         <el-input v-model="form.cpu"></el-input>
       </el-form-item>
@@ -33,8 +25,6 @@ export default {
       formRef: "formForAddService",
       form: {
         name: '',
-        url: '/', // TODO
-        environment: 'Python3 - Function as a Service', // TODO
         cpu: 0,
         memory: 0.0,
       },

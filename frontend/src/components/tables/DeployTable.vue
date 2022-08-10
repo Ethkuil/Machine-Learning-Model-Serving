@@ -3,7 +3,6 @@
     <!-- id列，提交请求时用 -->
     <el-table-column prop="id" label="id" sortable></el-table-column>
     <el-table-column prop="name" label="名称" sortable></el-table-column>
-    <el-table-column prop="type" label="类型" sortable></el-table-column>
     <el-table-column prop="start_time" label="开始时间" sortable></el-table-column>
     <el-table-column prop="state" label="状态" sortable></el-table-column>
     <el-table-column label="操作" align="center">

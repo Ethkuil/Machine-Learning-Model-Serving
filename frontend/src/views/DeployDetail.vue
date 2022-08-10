@@ -3,23 +3,30 @@
     <el-page-header @back="goBack" title="返回" class="page-header" />
 
     <el-header class="row-bg">
-      <el-row type="flex">
-        <el-col>
+      <el-row type="flex" align="middle" justify="space-between">
+        <div>
           <h3>{{ deploy.name }}</h3>
-        </el-col>
-        <el-row class="info" type="flex" justify="space-between">
-          <el-col>
-            <el-row class="label">类型</el-row>
-            <el-row class="content">{{ deploy.type }}</el-row>
-            <el-row class="label">模型</el-row>
-            <el-row class="content">{{ deploy.model }}</el-row>
-            <el-row class="label">服务状态</el-row>
-            <el-row class="content">{{ deploy.state }}</el-row>
-            <el-row class="label">开始时间</el-row>
-            <el-row class="content-time">{{ deploy.start_time }}</el-row>
-          </el-col>
-
-        </el-row>
+        </div>
+        <div>
+          <el-row class="info" type="flex">
+            <el-col>
+              <el-row class="label">类别</el-row>
+              <el-row class="content">{{ deploy.category }}</el-row>
+            </el-col>
+            <el-col>
+              <el-row class="label">模型</el-row>
+              <el-row class="content">{{ deploy.model }}</el-row>
+            </el-col>
+            <el-col>
+              <el-row class="label">服务状态</el-row>
+              <el-row class="content">{{ deploy.state }}</el-row>
+            </el-col>
+            <el-col>
+              <el-row class="label">开始时间</el-row>
+              <el-row class="content-time">{{ deploy.start_time }}</el-row>
+            </el-col>
+          </el-row>
+        </div>
       </el-row>
     </el-header>
 
@@ -43,7 +50,7 @@ export default {
       deploy: {
         id: 1,
         name: '部署1',
-        type: 'test',
+        category: '网络服务',
         start_time: '2020-01-01 00:30',
         state: '运行中',
         model: 'model1',
@@ -72,14 +79,16 @@ export default {
   background-color: #f5f5f5;
 }
 
-.description {
-  color: #999;
-  font-size: 14px;
+
+.info * {
+  width: max-content;
+  padding-left: 16px;
 }
 
-.label {
-  color: #999;
+.info .label {
   font-size: 14px;
+  color: #999;
+  padding-bottom: 5px;
 }
 
 .content {

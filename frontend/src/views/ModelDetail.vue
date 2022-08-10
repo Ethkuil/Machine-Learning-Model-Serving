@@ -2,30 +2,32 @@
   <div>
     <el-page-header @back="goBack" title="返回" class="page-header" />
 
-    <el-header class="row-bg">
-      <el-row type="flex">
-        <el-col>
+    <el-header class="row-bg" style="height:max-content">
+      <el-row type="flex" align="middle" justify="space-between">
+        <div>
           <h3>{{ model.name }}</h3>
           <p class="description">{{ model.description }}</p>
-        </el-col>
-        <el-row class="info" type="flex" justify="space-between">
-          <el-col class="tab">
-            <el-row class="label">修改时间</el-row>
-            <el-row class="content-time">{{ model.update_time }}</el-row>
-          </el-col>
-          <el-col class="tab">
-            <el-row class="label">类型</el-row>
-            <el-row class="content">{{ model.type }}</el-row>
-          </el-col>
-          <el-col class="tab">
-            <el-row class="label">算法</el-row>
-            <el-row class="content">{{ model.algorithm }}</el-row>
-          </el-col>
-          <el-col class="tab">
-            <el-row class="label">引擎</el-row>
-            <el-row class="content">{{ model.engine }}</el-row>
-          </el-col>
-        </el-row>
+        </div>
+        <div>
+          <el-row class="info" type="flex">
+            <el-col>
+              <el-row class="label">修改时间</el-row>
+              <el-row class="content-time">{{ model.update_time }}</el-row>
+            </el-col>
+            <el-col>
+              <el-row class="label">类型</el-row>
+              <el-row class="content">{{ model.type }}</el-row>
+            </el-col>
+            <el-col>
+              <el-row class="label">算法</el-row>
+              <el-row class="content">{{ model.algorithm }}</el-row>
+            </el-col>
+            <el-col>
+              <el-row class="label">引擎</el-row>
+              <el-row class="content">{{ model.engine }}</el-row>
+            </el-col>
+          </el-row>
+        </div>
       </el-row>
     </el-header>
 
@@ -66,43 +68,8 @@ export default {
         type: "PMML",
         algorithm: "MiningModel(classification)",
         engine: "PyPMML",
-        inputVariablesData: [
-          /*
-          {
-            field: 'sepal length(cm)',
-            type: 'double',
-            measure: 'continuous',
-            value: ''
-          },
-
-          */
-        ],
-        targetVariablesData: [
-          /*
-          {
-            field: 'Species',
-            type: 'integer',
-            measure: 'nominal',
-            value: '0,1,2'
-          }
-          */
-        ],
-        deploys: [
-          {
-            id: 1,
-            name: '部署1',
-            type: 'PMML',
-            start_time: '2017-01-15 16:01',
-            state: '运行中'
-          },
-          {
-            id: 3,
-            name: '部署3',
-            type: 'PMML',
-            start_time: '2019-06-01 19:01',
-            state: '运行中'
-          },
-        ],
+        inputVariablesData: [],
+        deploys: [],
         tests: [],
         predictions: [],
         batchPredictions: [],
@@ -114,64 +81,7 @@ export default {
     goBack() {
       this.$router.go(-1);
     },
-    getData () {
-      console.log('enter getData')
-        const path = 'http://localhost:5000/getModelDetail'
-        const payload = {   // TO DO: 从前端读取文件路径或者直接读取文件
-          'filePath': '/Users/janet/Desktop/bigHomework/xgb-iris.pmml'
-          //'mnist-8.onnx'#'rf_iris.onnx'#'.\demo.pmml'#'xgb-iris.pmml'# 'models/randomForest.pmml'
-        }
-        axios.post(path, payload).then((response) => {
-          /*
-          console.log('filePath:', response.data.filePath);
-          console.log('xNames:', response.data.xNames);
-          console.log('xDTS:', response.data.xDataTypes);
-          console.log('xOTS:', response.data.xOpTypes);
-          console.log('yNames:', response.data.yNames);
-          console.log('yDTS:', response.data.yDataTypes);
-          console.log('yOTS:', response.data.yOpTypes);
-          */
-          this.model.inputVariablesData = []
-          for (let i = 0; i < response.data.xNames.length; i++) {
-            var tmp = {
-              field: response.data.xNames[i],
-              type: response.data.xDataTypes[i],
-              measure: response.data.xOpTypes[i],
-              value: '',
-            }
-            if(response.data.xValues[i]) {
-              console.log('enter loop')
-              var li = response.data.xValues[i]
-              for (let j = 0; j < li.length; j++) {
-                tmp.value += (li[j] + ',')
-              }
-            }
-            this.model.inputVariablesData.push(tmp)
-          }
-          this.model.targetVariablesData = []
-          for (let i = 0; i < response.data.yNames.length; i++) {
-            var tmp = {
-              field: response.data.yNames[i],
-              type: response.data.yDataTypes[i],
-              measure: response.data.yOpTypes[i],
-              value: '',
-            }
-            if(response.data.yValues[i]) {
-              // console.log('enter loop')
-              var li = response.data.yValues[i]
-              for (let j = 0; j < li.length; j++) {
-                tmp.value += (li[j] + ',')
-              }
-              tmp.value = tmp.value.slice(0, (tmp.value.length - 1))   //删除最后一个逗号
-            }
-            this.model.targetVariablesData.push(tmp)
-          }
-        })
-    },
-    },
-  created () {
-    this.getData()
-  },
+  }
   components: { OverviewTab, DeployTab, TestTab }
 }
 </script>
@@ -189,18 +99,19 @@ export default {
   font-size: 14px;
 }
 
-.tab{
-  width: 80px;
+.info * {
+  width: max-content;
+  padding-left: 16px;
 }
 
 .label {
   color: #999;
   font-size: 14px;
+  padding-bottom: 5px;
 }
 
 .content {
-  font-size: 15px;
-  word-wrap: break-word;
+  font-size: 20px;
 }
 
 .content-time {

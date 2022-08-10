@@ -7,7 +7,7 @@
             <div slot="header">
               <el-row type="flex" justify="space-between" align="middle">
                 <h2 class="card-title">实时预测（快速返回）</h2>
-                <el-button type="text" @click="">生成代码</el-button> <!-- TODO -->
+                <el-button type="text" @click="">生成代码</el-button> <!-- TODO 生成使用curl命令调用REST API的代码 -->
               </el-row>
             </div>
 

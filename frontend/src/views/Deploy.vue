@@ -30,21 +30,18 @@ export default {
         {
           id: 1,
           name: '部署1',
-          type: 'PMML',
           date: '2017-01-15',
           state: '运行中'
         },
         {
           id: 2,
           name: '部署2',
-          type: 'ONNX',
           date: '2018-01-03',
           state: '运行中'
         },
         {
           id: 3,
           name: '部署3',
-          type: 'PMML',
           date: '2019-06-01',
           state: '运行中'
         },
@@ -66,6 +63,7 @@ export default {
 </script>
 <style scoped>
 .main {
-  background-color: #f1f2f6
+  background-color: #f1f2f6;
+  height: calc(100vh - 186px);
 }
 </style>
