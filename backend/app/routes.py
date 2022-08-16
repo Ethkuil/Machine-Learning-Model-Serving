@@ -43,38 +43,45 @@ def getModelDetail():
 
 @app.route('/models',methods=['POST','GET'])
 def models():
-    if request.method=='POST':
+    if request.method == 'GET':
+        responseData = [
+            {
+                "id": i.id,
+                "name": i.name,
+                "type": i.type,
+                "update_time": i.updateTime,
+            }
+            for i in data.modelList
+        ]
+
+        return_response={
+            "data":responseData
+        }
+        return jsonify(return_response)
+    elif request.method == 'POST':
         modelArgs=request.values.to_dict()
         file=request.files.get('file')
         if file is None:
             return "no file"
-            
-        
+
+
         file_name=file.filename.replace(" ","")
-        file_path=os.path.dirname(__file__)+'/upload/'+file_name
+        file_path = f'{os.path.dirname(__file__)}/upload/{file_name}'
         file.save(file_path)
-        
+
         input,target=readFile(file_path)
-        inputVariables=[]
-        targetVariables=[]
+        inputVariables = []
         for ii in input:
-            inputVars={}
-            inputVars["field"]=ii.name
-            inputVars["data_type"]=ii.dataType
-            inputVars["op_type"]=ii.opType
+            inputVars = {"field": ii.name, "data_type": ii.dataType, "op_type": ii.opType}
             #维度
             inputVariables.append(inputVars)
-            pass
-        
+        targetVariables = []
         for ii in target:
-            targetVars={}
-            targetVars["field"]=ii.name
-            targetVars["data_type"]=ii.dataType
-            targetVars["op_type"]=ii.opType
+            targetVars = {"field": ii.name, "data_type": ii.dataType, "op_type": ii.opType}
             targetVariables.append(targetVars)
-            
-            
-        
+
+
+
         mymodel=data.myModel(data.dataIndex,modelArgs['name'],modelArgs['description'],modelArgs['type'],file_path,datetime.datetime.now())
         data.dataIndex+=1
         data.addModel(mymodel)
@@ -90,21 +97,7 @@ def models():
                 #service
             }
         }
-        
-        return jsonify(return_response)
-        
-    elif request.method=='GET':
-        responseData=[]
-        for i in data.modelList:
-            responseData.append({
-                "id":i.id,
-                "name":i.name,
-                "type":i.type,
-                "update_time":i.updateTime
-            })
-        return_response={
-            "data":responseData
-        }    
+
         return jsonify(return_response)
         
         

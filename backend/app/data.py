@@ -10,7 +10,6 @@ class myModel:
         self.type=type
         self.filepath=filepath
         self.updateTime=updateTime
-        pass
     
     
 def dataInit():
