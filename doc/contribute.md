@@ -6,7 +6,7 @@
 
 1. 可在GitHub上提`issue`，以及认领自己打算做的功能。
 
-2. 认领任务后，则新建`分支`进行开发。**包括测试用例**。若更改了API，需修改`API.md`文档。
+2. 认领任务后，则新建`分支`进行开发。**包括测试用例**。若更改了API，需修改API文档。
 ```bash
 git checkout -b <branch> # 基于当前分支创建新分支，并切换到新分支
 git push -u origin <branch> # 在远程仓库创建同名分支. -u表示指定为当前分支的upstream, 这样之后的push、pull可省略参数
