@@ -1,7 +1,15 @@
+import imp
 from flask import Flask
+from flask_cors import CORS
 
 app = Flask(__name__,
             template_folder="../../frontend/dist",
-            static_folder="../../frontend/dist/static")
+            static_folder="../../frontend/dist/static")  # 需要时可将系统改造为后端渲染
 
-from app import routes
+CORS(app, support_credentials=True)
+
+from app import data
+
+from app import models
+
+data.dataInit()

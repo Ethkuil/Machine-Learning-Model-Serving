@@ -1,22 +1,28 @@
 import re
 # testStr = 'mnist-8.onnx'#'rf_iris.onnx'#'.\demo.pmml'#'xgb-iris.pmml'# 'models/randomForest.pmml'  # get from front end
 
+
 class dataElement():
-    def __init__(self, name = "", dataType = "", opType = ""):
+
+    def __init__(self, name="", dataType="", opType=""):
         self.name = name  #字段
         self.dataType = dataType  #类型
         self.opType = opType  #测量
         self.value = []  #取值
 
+
 x = []
 y = []
+
 
 def readPMML(openFileStr):
     x.clear()
     y.clear()
-    pmmlFile = open(openFileStr)# open('xgb-iris.pmml') # open('.\demo.pmml')
+    pmmlFile = open(openFileStr)  # open('xgb-iris.pmml') # open('.\demo.pmml')
     codes = pmmlFile.read()
-    dataDict = re.search(r"\<DataDictionary((\snumberOfFields=\"\d+\")?)\>(\s|\S)*\</DataDictionary\>", codes)
+    dataDict = re.search(
+        r"\<DataDictionary((\snumberOfFields=\"\d+\")?)\>(\s|\S)*\</DataDictionary\>",
+        codes)
     dataDict = dataDict.group()
     miningSchema = re.search(r"\<MiningSchema(\s|\S)*?\</MiningSchema", codes)
     miningSchema = miningSchema.group()
@@ -48,12 +54,12 @@ def readPMML(openFileStr):
         if opType is not None:
             opType = opType.group()
             opType = opType.split("\"")[1]
-            
+
         dataType = re.search(r"dataType=\"\S+\"", eachElement)
         if dataType is not None:
             dataType = dataType.group()
             dataType = dataType.split("\"")[1]
-            
+
         print(name, "  ", opType, "  ", dataType)
         newDataElement = dataElement(name, dataType, opType)
         if count in yIndex:
@@ -69,7 +75,8 @@ def readPMML(openFileStr):
                 newDataElement.value.append(eachValue.split("\"")[1])
                 print(newDataElement.value)
         count += 1
-    model = re.search(r"\<(\S)*?Model(\s|\S)*?functionName=\"(\s|\S)*?\"", codes)
+    model = re.search(r"\<(\S)*?Model(\s|\S)*?functionName=\"(\s|\S)*?\"",
+                      codes)
     if model is not None:
         model = model.group()
         modelName = model.split("Model")[0]
@@ -78,7 +85,7 @@ def readPMML(openFileStr):
         model = model.split('functionName=\"')[1]
         model = model[:-1]
     print(model)
-  
+
 
 def readONNX(openFileStr):
     x.clear()
@@ -89,9 +96,9 @@ def readONNX(openFileStr):
     onnxSession = onnxruntime.InferenceSession(openFileStr)
     for node in onnxSession.get_inputs():
         newElement = dataElement(node.name, node.type, str(node.shape))
-        print(node.name," ", node.type, " ",str(node.shape))
+        print(node.name, " ", node.type, " ", str(node.shape))
         x.append(newElement)
-    
+
     with open('onnxContent.txt', 'w') as f:
         f.write('{}'.format(onnx_model))
 
@@ -125,24 +132,26 @@ def readONNX(openFileStr):
     '''
     #output = onnx_model.graph.output
     #print(output)
-  
+
+
 ''''''
 
 # to do: 判断是pmml类型还是onnx类型
 
+
 # to do: 验证pmml文件有效性
-def readFile(openFileStr):
+def readModel(openFileStr):
     if openFileStr[-5:] == '.pmml':
         readPMML(openFileStr)
         for xx in x:
             print('x: ', xx.name)
-        for yy in y: 
+        for yy in y:
             print('y: ', yy.name)
     elif openFileStr[-5:] == ".onnx":
         readONNX(openFileStr)
         for xx in x:
             print('x: ', xx.name)
-        for yy in y: 
+        for yy in y:
             print('y: ', yy.name)
     else:
         print("wrong input file!")
