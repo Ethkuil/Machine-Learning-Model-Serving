@@ -3,8 +3,10 @@ from werkzeug.utils import secure_filename
 from app import app, data
 import datetime
 import os
+import base64
 from .utils.readModel import readModel
 from .utils.utils import fileExtension
+from .utils.predict import predict
 
 
 @app.route('/models', methods=['POST', 'GET'])
@@ -65,3 +67,44 @@ def models():
             }
         }
         return jsonify(return_response)
+
+
+@app.route('/models/<int:id>/predict', methods=['POST'])
+def modelPredict(id):
+    # 获取模型
+    try:
+        mymodel = data.getModel(id)
+        if mymodel is None:
+            raise Exception("模型不存在")
+    except Exception as e:
+        response = jsonify({"error": str(e)})
+        response.status_code = 404
+        return response
+    filePath = mymodel.filePath
+
+    # 读取body，获取输入数据
+    inputData = {}
+    if request.headers.get('Content-Type') == 'multipart/form-data':
+        for key in request.files:
+            inputData[key] = request.files[key]
+        for key in request.form:
+            inputData[key] = request.form[key]
+    elif request.headers.get('Content-Type') == 'application/json':
+        body = request.json
+        for key in body:
+            if isinstance(body[key], dict) and body[key]['type'] == 'base64':
+                inputData[key] = base64.b64decode(body[key]['value'])
+            else:
+                inputData[key] = body[key]
+
+    # 利用模型预测
+    result = predict(modelFilePath=filePath, type=mymodel.type, data=inputData)
+    # 化为json格式
+    result = {key: result[key] for key in result}
+
+    responseData = {
+        "data": {
+            "result": result
+        }
+    }
+    return jsonify(responseData)
