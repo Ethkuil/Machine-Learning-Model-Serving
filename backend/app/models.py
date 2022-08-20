@@ -18,8 +18,8 @@ python3 -m flask run
 def models():
     if request.method == 'GET':
         responseData = []
-        for i in range(MODELS.getNextId() - 1):
-            _model = MODELS.findModel(i + 1)
+        for i in range(MODELS.getNextId()):
+            _model = MODELS.findModel(i)
             if _model is None: # 如果i被删除了
                 pass
             else:
