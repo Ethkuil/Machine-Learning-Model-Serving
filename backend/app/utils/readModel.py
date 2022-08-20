@@ -31,21 +31,17 @@ def readPMML(openFileStr):
     datafield = dataDict.split("<DataField ")
     del datafield[0]
 
-    #print(datafield)
-
-    yIndex = []
-
     # to do: find "usageType="target" --> mark its index --> add to y
     miningSchema = miningSchema.split("<MiningField ")
     del miningSchema[0]
-    count = 0
-    for eachElement in miningSchema:
-        if "usageType=\"target\"" in eachElement or "usageType=\"predicted\"" in eachElement:
-            yIndex.append(count)
-        count += 1
+    yIndex = [
+        count
+        for count, eachElement in enumerate(miningSchema)
+        if "usageType=\"target\"" in eachElement
+        or "usageType=\"predicted\"" in eachElement
+    ]
 
-    count = 0
-    for eachElement in datafield:  # to do: 缺省值
+    for count, eachElement in enumerate(datafield):  # to do: 缺省值
         name = re.search(r"name=\"(\S|\s)+\"", eachElement)
         if name is not None:
             name = name.group()
@@ -68,28 +64,26 @@ def readPMML(openFileStr):
         else:
             x.append(newDataElement)
         if opType == 'categorical':
-            pass
             # to do: find all values and add them to list value
             valueElement = eachElement.split("<Value ")
             del valueElement[0]
             for eachValue in valueElement:
                 newDataElement.value.append(eachValue.split("\"")[1])
                 print(newDataElement.value)
-        if newDataElement.value == []:
-            newDataElement.value = "" 
-        else: 
-            newDataElement.value = str(newDataElement.value)
-        count += 1
+        newDataElement.value = (
+            "" if newDataElement.value == [] else str(newDataElement.value)
+        )
+
     model = re.search(r"\<(\S)*?Model(\s|\S)*?functionName=\"(\s|\S)*?\"",
                       codes)
     if model is not None:
         model = model.group()
         modelName = model.split("Model")[0]
-        modelName = modelName[1:] + "Model"
+        modelName = f"{modelName[1:]}Model"
         print(modelName)
         model = model.split('functionName=\"')[1]
         model = model[:-1]
-    modelType = modelName +'(' + model + ')'
+    modelType = f'{modelName}({model})'
     print(modelType)
     return x, y, modelType
     
@@ -104,7 +98,7 @@ def readONNX(openFileStr):
     onnxSession = onnxruntime.InferenceSession(openFileStr)
     for node in onnxSession.get_inputs():
         newElement = dataElement(node.name, node.type, "", str(node.shape))
-        print(node.name, " ", node.type, " ", str(node.shape))
+        print(node.name, " ", node.type, " ", node.shape)
         newElement.value = ''
         x.append(newElement)
 
@@ -118,32 +112,11 @@ def readONNX(openFileStr):
     try:
         onnx.checker.check_model(onnx_model)
     except onnx.checker.ValidationError as e:
-        print('The model is invalid: %s' % e)
+        print(f'The model is invalid: {e}')
     else:
         print('The model is valid!')
-        
+
     return x, y, '-'
-    '''
-    # iterate through inputs of the graph
-    for input in onnx_model.graph.input:
-        print (input.name, end=": ")
-        # get type of input tensor
-        tensor_type = input.type.tensor_type
-        # check if it has a shape:
-        if (tensor_type.HasField("shape")):
-            # iterate through dimensions of the shape:
-            for d in tensor_type.shape.dim:
-                # the dimension may have a definite (integer) value or a symbolic identifier or neither:
-                if (d.HasField("dim_value")):
-                    print (d.dim_value, end=", ")  # known dimension
-                elif (d.HasField("dim_param")):
-                    print (d.dim_param, end=", ")  # unknown dimension with symbolic name
-                else:
-                    print ("?", end=", ")  # unknown dimension with no name
-        else:
-            print ("unknown rank", end="")
-        print()
-    '''
     #output = onnx_model.graph.output
     #print(output)
 
@@ -157,16 +130,8 @@ def readONNX(openFileStr):
 def readModel(openFileStr):
     if openFileStr[-5:] == '.pmml':
         return readPMML(openFileStr)
-        '''for xx in x:
-            print('x: ', xx.name)
-        for yy in y:
-            print('y: ', yy.name)'''
     elif openFileStr[-5:] == ".onnx":
         return readONNX(openFileStr)
-        '''for xx in x:
-            print('x: ', xx.name)
-        for yy in y:
-            print('y: ', yy.name)'''
     else:
         print("wrong input file!")
         exit(0)

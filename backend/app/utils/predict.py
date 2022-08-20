@@ -19,13 +19,13 @@ def testPMML(filepath, data):
     X_in, y_in, al = readModel(filepath)
     X_test = []
     for i in X_in:
-        if i.dataType == 'double' or i.dataType == 'float':
+        if i.dataType in ['double', 'float']:
             X_test.append(float(data[i.name]))
         elif i.dataType == 'int':
             X_test.append(int(data[i.name]))
     res = model.predict(X_test)
     outputList = searchOutput(filepath)  # 输出变量名称列表
-    outputDict = dict()
+    outputDict = {}
     for i in range(len(res)):
         print(outputList[i], ' ', res[i])
         outputDict[outputList[i]] = res[i]
@@ -63,7 +63,7 @@ def testONNX(filepath, data):
     ort_session = onnxruntime.InferenceSession(model.SerializeToString())
     ort_inputs = {}
     # print(data)
-    for i, input_ele in enumerate(ort_session.get_inputs()):
+    for input_ele in ort_session.get_inputs():
         # print('data: ', data[input_ele.name])
         #检查输入类型
         if 'tensor' in input_ele.type: # 如果是tensor类型变量
@@ -82,7 +82,7 @@ def testONNX(filepath, data):
             ort_inputs[input_ele.name] = inputValue
     outputs = [x.name for x in ort_session.get_outputs()]
     ort_outs = ort_session.run(outputs, ort_inputs)
-    outputDict = dict()
+    outputDict = {}
     for i, output_ele in enumerate(ort_session.get_outputs()):
         if type(ort_outs[i]) == type(np.array([])): # 糊弄
             print(type(ort_outs[i]))
@@ -98,16 +98,9 @@ def testONNX(filepath, data):
                 nums.append(float(el))'''
 
 def getNums(string):
-    ret = []
     find = re.findall(r"-?[1-9]\d*\.\d*(?#绝对值大于1的浮点数)|-?0\.\d*(?#绝对值小于1的浮点数)|-?\d+(?#整数)", string)
     print(find)
-    for f in find:
-        ret.append(float(f))
-    return ret
+    return [float(f) for f in find]
 
 def toJSONoutput(res):
-    out = dict()
-    out['result'] = res
-    out['stderr'] = []  # 糊弄哈哈哈哈哈 (我也不知道这部分什么意思)
-    out['stdout'] = []
-    return out
+    return {'result': res, 'stderr': [], 'stdout': []}

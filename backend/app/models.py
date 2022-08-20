@@ -78,14 +78,9 @@ def models():
 @app.route('/models/<int:id>', methods=['POST', 'GET', 'DELETE'])
 def someModel(id): 
     # 在Model Table中选中详情时
-    if request.method == 'POST':
-        response = {
-            'url': 'success'
-        }
-        return jsonify(response)  
-    elif request.method=='DELETE':
-        findMark = False
+    if request.method == 'DELETE':
         print('id: ', id)
+        findMark = False
         for mod in data.modelList:
             if id == mod.id:
                 findMark = True
@@ -97,7 +92,12 @@ def someModel(id):
                     return jsonify({"message":{e}})
         if findMark == False:
             return "no File", 404
-         
+
+    elif request.method == 'POST':
+        response = {
+            'url': 'success'
+        }
+        return jsonify(response)
     # method == GET   Model Detail 启动时
     model = data.findModel(id) #找到当前的模型
     inputs, target, algorithm = readModel(model.filepath)
@@ -111,7 +111,7 @@ def someModel(id):
             "shape":ii.shape,
             "value":ii.value
         }
-        inputVariables.append(inputVars)  
+        inputVariables.append(inputVars)
     for ii in target:
         targetVars={
             "field":ii.name,
@@ -120,7 +120,7 @@ def someModel(id):
             "shape":ii.shape,
             "value":ii.value
         }
-        targetVariables.append(targetVars)           
+        targetVariables.append(targetVars)
     response = {
         # 'filePath': filePathStr,
         "id": model.id,
