@@ -1,9 +1,9 @@
 from flask import request, jsonify
 from werkzeug.utils import secure_filename
-from app import app, data
-import datetime
 import os
 import base64
+from app import app
+from data import MODELS
 from .utils.readModel import readModel
 from .utils.utils import fileExtension
 from .utils.predict import predict
@@ -17,7 +17,7 @@ def models():
             "name": i.name,
             "type": i.type,
             "update_time": i.updateTime
-        } for i in data.modelList]
+        } for i in MODELS.__models if i]
         return_response = {"data": responseData}
         return jsonify(return_response)
 
@@ -28,32 +28,23 @@ def models():
         if file is None:
             return jsonify({"error": "参数不正确"})
         fileName = secure_filename(file.filename).replace(" ", "")
-        filePath = f'{os.path.dirname(__file__)}/upload/{data.dataIndex}.{fileExtension(fileName)}'
+        filePath = f'{os.path.dirname(__file__)}/upload/{MODELS.nextId}.{fileExtension(fileName)}'
         file.save(filePath)
 
         input, target = readModel(filePath)
-        inputVariables = []
-        for ii in input:
-            inputVars = {
-                "field": ii.name,
-                "data_type": ii.dataType,
-                "op_type": ii.opType
-            }
-            inputVariables.append(inputVars)
-        targetVariables = []
-        for ii in target:
-            targetVars = {
-                "field": ii.name,
-                "data_type": ii.dataType,
-                "op_type": ii.opType
-            }
-            targetVariables.append(targetVars)
+        inputVariables = [{
+            "field": ii.name,
+            "data_type": ii.dataType,
+            "op_type": ii.opType
+        } for ii in input]
+        targetVariables = [{
+            "field": ii.name,
+            "data_type": ii.dataType,
+            "op_type": ii.opType
+        } for ii in target]
 
-        mymodel = data.myModel(data.dataIndex, modelArgs['name'],
-                               modelArgs['description'], modelArgs['type'],
-                               filePath, datetime.datetime.now())
-        data.dataIndex += 1
-        data.addModel(mymodel)
+        mymodel = MODELS.addModel(modelArgs['name'], modelArgs['description'],
+                                  modelArgs['type'], filePath)
 
         return_response = {
             "data": {
@@ -73,7 +64,7 @@ def models():
 def modelPredict(id):
     # 获取模型
     try:
-        mymodel = data.getModel(id)
+        mymodel = MODELS.getModel(id)
         if mymodel is None:
             raise Exception("模型不存在")
     except Exception as e:
@@ -102,9 +93,5 @@ def modelPredict(id):
     # 化为json格式
     result = {key: result[key] for key in result}
 
-    responseData = {
-        "data": {
-            "result": result
-        }
-    }
+    responseData = {"data": {"result": result}}
     return jsonify(responseData)

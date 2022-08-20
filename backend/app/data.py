@@ -1,7 +1,11 @@
-#存放各类数据 列表存入的是绝对路径
+# 存放各类数据. 模型、服务、任务的信息
+# 目前数据存放在内存中. 基本功能完成后，若有余力可使用数据库，这样重启服务器后不会丢失数据
+
+import datetime
+import os
 
 
-class myModel:
+class Model:
 
     def __init__(self, id, name, description, type, filePath, updateTime):
         self.id = id
@@ -12,20 +16,38 @@ class myModel:
         self.updateTime = updateTime
 
 
+class Models:
+
+    def __init__(self):
+        self.__models = []
+        self.nextId = 0
+
+    def getModel(self, id):
+        return self.__models[id]
+
+    def addModel(self, name, description, type, filePath):
+        """
+        :return: 所添加的模型变量
+        """
+        model = Model(self.nextId, name, description, type, filePath,
+                      datetime.datetime.now())
+        self.nextId += 1
+        self.__models.append(model)
+        return model
+
+    def deleteModel(self, id):
+        """
+        :return: True, 若正确删除；False, 若模型不存在
+        """
+        if model := self.__models[id]:
+            os.remove(model.filePath)
+            self.__models[id] = None
+            return True
+        else:
+            return False
+
+
 def dataInit():
-    global modelList
-    global dataIndex # 用于记录新模型的id
-    dataIndex = 0
-    modelList = []
-
-# 抽象为函数，不对外暴露具体实现，以便之后可能的修改
-# 其他数据的操作同样建议改成这样，暴露太多细节易出错. 如dateIndex+=1本应在addModel()中自动完成
-# 数据结构修改完毕后请删除这些注释
-def getModel(id):
-    global modelList
-    return modelList[id]
-
-def addModel(model):
-    global modelList
-    modelList.append(model)
-    return len(modelList) - 1
+    # 全局变量命名规范：全大写，下划线分割
+    global MODELS
+    MODELS = Models()
