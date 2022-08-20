@@ -4,11 +4,12 @@ import re
 
 class dataElement():
 
-    def __init__(self, name="", dataType="", opType=""):
+    def __init__(self, name="", dataType="", opType="", shape=""):
         self.name = name  #字段
         self.dataType = dataType  #类型
         self.opType = opType  #测量
         self.value = []  #取值
+        self.shape = shape
 
 
 x = []
@@ -61,7 +62,7 @@ def readPMML(openFileStr):
             dataType = dataType.split("\"")[1]
 
         print(name, "  ", opType, "  ", dataType)
-        newDataElement = dataElement(name, dataType, opType)
+        newDataElement = dataElement(name, dataType, opType, "")
         if count in yIndex:
             y.append(newDataElement)
         else:
@@ -74,6 +75,10 @@ def readPMML(openFileStr):
             for eachValue in valueElement:
                 newDataElement.value.append(eachValue.split("\"")[1])
                 print(newDataElement.value)
+        if newDataElement.value == []:
+            newDataElement.value = "" 
+        else: 
+            newDataElement.value = str(newDataElement.value)
         count += 1
     model = re.search(r"\<(\S)*?Model(\s|\S)*?functionName=\"(\s|\S)*?\"",
                       codes)
@@ -84,7 +89,10 @@ def readPMML(openFileStr):
         print(modelName)
         model = model.split('functionName=\"')[1]
         model = model[:-1]
-    print(model)
+    modelType = modelName +'(' + model + ')'
+    print(modelType)
+    return x, y, modelType
+    
 
 
 def readONNX(openFileStr):
@@ -95,12 +103,16 @@ def readONNX(openFileStr):
     onnx_model = onnx.load(openFileStr)
     onnxSession = onnxruntime.InferenceSession(openFileStr)
     for node in onnxSession.get_inputs():
-        newElement = dataElement(node.name, node.type, str(node.shape))
+        newElement = dataElement(node.name, node.type, "", str(node.shape))
         print(node.name, " ", node.type, " ", str(node.shape))
+        newElement.value = ''
         x.append(newElement)
 
-    with open('onnxContent.txt', 'w') as f:
-        f.write('{}'.format(onnx_model))
+    for node in onnxSession.get_outputs():
+        newElement = dataElement(name=node.name, dataType=node.type, shape=str(node.shape) if str(node.shape) != '[]' else '')
+        print(node.name," ", node.type, " ", str(node.shape) if str(node.shape) != '[]' else '')
+        newElement.value = ''
+        y.append(newElement)
 
     # Check the model
     try:
@@ -109,6 +121,8 @@ def readONNX(openFileStr):
         print('The model is invalid: %s' % e)
     else:
         print('The model is valid!')
+        
+    return x, y, '-'
     '''
     # iterate through inputs of the graph
     for input in onnx_model.graph.input:
@@ -142,18 +156,18 @@ def readONNX(openFileStr):
 # to do: 验证pmml文件有效性
 def readModel(openFileStr):
     if openFileStr[-5:] == '.pmml':
-        readPMML(openFileStr)
-        for xx in x:
+        return readPMML(openFileStr)
+        '''for xx in x:
             print('x: ', xx.name)
         for yy in y:
-            print('y: ', yy.name)
+            print('y: ', yy.name)'''
     elif openFileStr[-5:] == ".onnx":
-        readONNX(openFileStr)
-        for xx in x:
+        return readONNX(openFileStr)
+        '''for xx in x:
             print('x: ', xx.name)
         for yy in y:
-            print('y: ', yy.name)
+            print('y: ', yy.name)'''
     else:
         print("wrong input file!")
         exit(0)
-    return x, y
+    return x, y, '-'
