@@ -8,8 +8,8 @@ app = Flask(__name__,
 
 CORS(app, support_credentials=True)
 
-from app import data
+app.config['JSON_AS_ASCII'] = False # 允许中文输出
 
-from app import models
+import data
 
 data.dataInit()

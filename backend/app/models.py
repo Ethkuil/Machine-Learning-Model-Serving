@@ -1,44 +1,45 @@
-from flask import Flask, request, jsonify
+from urllib import response
+from flask import request, jsonify
 from werkzeug.utils import secure_filename
-from flask_cors import CORS
 import datetime, os
-import data
+from app import app
 import base64
 from utils.readModel import readModel
 from utils.utils import fileExtension
 from utils.predict import predict
+from data import MODELS
 
-
-app = Flask(__name__)
-CORS(app, support_credentials=True)
-# Get port number from the environment varriable
-port = os.getenv("PORT")
-# os.path.abspath(os.path.join(os.path.dirname("__file__"),"../.."))
-
-data.dataInit() 
+'''
+export FLASK_APP=models.py
+python3 -m flask run
+'''
 
 @app.route('/models', methods=['POST', 'GET'])
 def models():
     if request.method == 'GET':
-        responseData = [{
-            "id": i.id,
-            "name": i.name,
-            "type": i.type,
-            "update_time": i.updateTime
-        } for i in data.modelList]
+        responseData = []
+        for i in range(MODELS.getNextId() - 1):
+            _model = MODELS.findModel(i + 1)
+            if _model is None: # 如果i被删除了
+                pass
+            else:
+                responseData.append({
+                    "id": _model.id,
+                    "name": _model.name,
+                    "type": _model.type,
+                    "update_time": _model.updateTime
+                })
         return_response = {"data": responseData}
         return jsonify(return_response)
 
     elif request.method == 'POST':
         modelArgs = request.values.to_dict()
-
         file = request.files.get('file')
         if file is None:
             return jsonify({"error": "参数不正确"})
         fileName = secure_filename(file.filename).replace(" ", "")
-        filePath = f'{os.path.dirname(__file__)}/upload/{data.dataIndex + 1}.{fileExtension(fileName)}'
+        filePath = f'{os.path.dirname(__file__)}/upload/{MODELS.getNextId()}.{fileExtension(fileName)}'
         file.save(filePath)
-
         input, target, algorithm = readModel(filePath)
         inputVariables = []
         for ii in input:
@@ -57,18 +58,17 @@ def models():
             }
             targetVariables.append(targetVars)
 
-        mymodel = data.myModel(data.dataIndex + 1, modelArgs['name'],
+        MODELS.addModel(modelArgs['name'],
                                modelArgs['description'], modelArgs['type'],
-                               filePath, datetime.datetime.now())
-        data.addModel(mymodel)
+                               filePath)
 
         return_response = {
             "data": {
-                "id": mymodel.id,
-                "name": mymodel.name,
-                "type": mymodel.type,
-                "update_time": mymodel.updateTime,
-                "description": mymodel.description,
+                "id": MODELS.getNextId() - 1,
+                "name": modelArgs['name'],
+                "type": modelArgs['type'],
+                "update_time": datetime.datetime.now(),
+                "description": modelArgs['description'],
                 "input_variables": inputVariables,
                 "target_variables": targetVariables
             }
@@ -77,29 +77,14 @@ def models():
 
 @app.route('/models/<int:id>', methods=['POST', 'GET', 'DELETE'])
 def someModel(id): 
-    # 在Model Table中选中详情时
-    if request.method == 'POST':
-        response = {
-            'url': 'success'
-        }
-        return jsonify(response)  
-    elif request.method=='DELETE':
-        findMark = False
-        print('id: ', id)
-        for mod in data.modelList:
-            if id == mod.id:
-                findMark = True
-                try:
-                    print('id: ', id)
-                    os.remove(data.deleteModel(id))
-                    return jsonify({})
-                except Exception as e:
-                    return jsonify({"message":{e}})
-        if findMark == False:
+    if request.method=='DELETE':
+        if MODELS.deleteModel(id):
+            return jsonify({'status': 'success'})
+        else:
             return "no File", 404
-         
-    # method == GET   Model Detail 启动时
-    model = data.findModel(id) #找到当前的模型
+        
+    # elif method == GET   Model Detail 启动时
+    model = MODELS.findModel(id) #找到当前的模型
     inputs, target, algorithm = readModel(model.filepath)
     inputVariables=[]
     targetVariables=[]
@@ -138,7 +123,7 @@ def someModel(id):
 def modelPredict(id):
     # 获取模型
     try:
-        mymodel = data.findModel(id)
+        mymodel = MODELS.findModel(id)
         if mymodel is None:
             raise Exception("模型不存在")
     except Exception as e:
@@ -157,7 +142,6 @@ def modelPredict(id):
     elif request.headers.get('Content-Type') == 'application/json':
         body = request.json
         for key in body:
-            print('key: ', key, " ", type(key))
             if isinstance(body[key], dict) and body[key]['type'] == 'base64':
                 inputData[key] = base64.b64decode(body[key]['value'])
             else:
@@ -174,12 +158,3 @@ def modelPredict(id):
         }
     }
     return jsonify(responseData)
-
-if __name__ == '__main__':
-    # If the app is running locally
-    if port is None:
-    # Use port 5000
-        app.run(host='0.0.0.0', port=5000, debug=True)
-    else:
-    # Else use cloud foundry default port
-        app.run(host='0.0.0.0', port=int(port), debug=False)
