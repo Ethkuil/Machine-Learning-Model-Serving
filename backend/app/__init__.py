@@ -10,6 +10,8 @@ CORS(app, support_credentials=True)
 
 app.config['JSON_AS_ASCII'] = False # 允许中文输出
 
-import data
+
+from app import data
+
 
 data.dataInit()
