@@ -30,19 +30,17 @@ def readPMML(openFileStr):
     # print(miningSchema)
     datafield = dataDict.split("<DataField ")
     del datafield[0]
-    yIndex = []
-
     # to do: find "usageType="target" --> mark its index --> add to y
     miningSchema = miningSchema.split("<MiningField ")
     del miningSchema[0]
-    count = 0
-    for eachElement in miningSchema:
-        if "usageType=\"target\"" in eachElement or "usageType=\"predicted\"" in eachElement:
-            yIndex.append(count)
-        count += 1
+    yIndex = [
+        count
+        for count, eachElement in enumerate(miningSchema)
+        if "usageType=\"target\"" in eachElement
+        or "usageType=\"predicted\"" in eachElement
+    ]
 
-    count = 0
-    for eachElement in datafield:  # to do: 缺省值
+    for count, eachElement in enumerate(datafield):  # to do: 缺省值
         name = re.search(r"name=\"(\S|\s)+\"", eachElement)
         if name is not None:
             name = name.group()
@@ -64,26 +62,24 @@ def readPMML(openFileStr):
         else:
             x.append(newDataElement)
         if opType == 'categorical':
-            pass
             # to do: find all values and add them to list value
             valueElement = eachElement.split("<Value ")
             del valueElement[0]
             for eachValue in valueElement:
                 newDataElement.value.append(eachValue.split("\"")[1])
-        if newDataElement.value == []:
-            newDataElement.value = "" 
-        else: 
-            newDataElement.value = str(newDataElement.value)
-        count += 1
+        newDataElement.value = (
+            "" if newDataElement.value == [] else str(newDataElement.value)
+        )
+
     model = re.search(r"\<(\S)*?Model(\s|\S)*?functionName=\"(\s|\S)*?\"",
                       codes)
     if model is not None:
         model = model.group()
         modelName = model.split("Model")[0]
-        modelName = modelName[1:] + "Model"
+        modelName = f"{modelName[1:]}Model"
         model = model.split('functionName=\"')[1]
         model = model[:-1]
-    modelType = modelName +'(' + model + ')'
+    modelType = f'{modelName}({model})'
     return x, y, modelType
     
 
@@ -109,26 +105,15 @@ def readONNX(openFileStr):
     try:
         onnx.checker.check_model(onnx_model)
     except onnx.checker.ValidationError as e:
-        print('The model is invalid: %s' % e)
-    else:
-        pass
-        
+        print(f'The model is invalid: {e}')
     return x, y, '-'
 
 # to do: 验证pmml文件有效性
 def readModel(openFileStr):
     if openFileStr[-5:] == '.pmml':
         return readPMML(openFileStr)
-        '''for xx in x:
-            print('x: ', xx.name)
-        for yy in y:
-            print('y: ', yy.name)'''
     elif openFileStr[-5:] == ".onnx":
         return readONNX(openFileStr)
-        '''for xx in x:
-            print('x: ', xx.name)
-        for yy in y:
-            print('y: ', yy.name)'''
     else:
         exit(0)
     return x, y, '-'

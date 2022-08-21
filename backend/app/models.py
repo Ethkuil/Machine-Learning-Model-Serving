@@ -20,9 +20,7 @@ def models():
         responseData = []
         for i in range(MODELS.getNextId()):
             _model = MODELS.findModel(i)
-            if _model is None: # 如果i被删除了
-                pass
-            else:
+            if _model is not None:
                 responseData.append({
                     "id": _model.id,
                     "name": _model.name,
@@ -82,7 +80,7 @@ def someModel(id):
             return jsonify({'status': 'success'})
         else:
             return "no File", 404
-        
+
     # elif method == GET   Model Detail 启动时
     model = MODELS.findModel(id) #找到当前的模型
     inputs, target, algorithm = readModel(model.filepath)

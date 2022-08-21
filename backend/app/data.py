@@ -28,8 +28,7 @@ class Models:
         return self.__models[id]
 
     def deleteModel(self, id):
-        model = self.__models[id]
-        if model:
+        if model := self.__models[id]:
             os.remove(model.filepath)
             self.__models[id] = None
             return True
