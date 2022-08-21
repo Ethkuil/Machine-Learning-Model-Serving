@@ -4,12 +4,11 @@ import re
 
 class dataElement():
 
-    def __init__(self, name="", dataType="", opType="", shape=""):
+    def __init__(self, name="", dataType="", opType=""):
         self.name = name  #字段
         self.dataType = dataType  #类型
         self.opType = opType  #测量
         self.value = []  #取值
-        self.shape = shape
 
 
 x = []
@@ -30,6 +29,9 @@ def readPMML(openFileStr):
     # print(miningSchema)
     datafield = dataDict.split("<DataField ")
     del datafield[0]
+
+    #print(datafield)
+
     yIndex = []
 
     # to do: find "usageType="target" --> mark its index --> add to y
@@ -58,7 +60,8 @@ def readPMML(openFileStr):
             dataType = dataType.group()
             dataType = dataType.split("\"")[1]
 
-        newDataElement = dataElement(name, dataType, opType, "")
+        print(name, "  ", opType, "  ", dataType)
+        newDataElement = dataElement(name, dataType, opType)
         if count in yIndex:
             y.append(newDataElement)
         else:
@@ -70,10 +73,7 @@ def readPMML(openFileStr):
             del valueElement[0]
             for eachValue in valueElement:
                 newDataElement.value.append(eachValue.split("\"")[1])
-        if newDataElement.value == []:
-            newDataElement.value = "" 
-        else: 
-            newDataElement.value = str(newDataElement.value)
+                print(newDataElement.value)
         count += 1
     model = re.search(r"\<(\S)*?Model(\s|\S)*?functionName=\"(\s|\S)*?\"",
                       codes)
@@ -81,11 +81,10 @@ def readPMML(openFileStr):
         model = model.group()
         modelName = model.split("Model")[0]
         modelName = modelName[1:] + "Model"
+        print(modelName)
         model = model.split('functionName=\"')[1]
         model = model[:-1]
-    modelType = modelName +'(' + model + ')'
-    return x, y, modelType
-    
+    print(model)
 
 
 def readONNX(openFileStr):
@@ -96,14 +95,12 @@ def readONNX(openFileStr):
     onnx_model = onnx.load(openFileStr)
     onnxSession = onnxruntime.InferenceSession(openFileStr)
     for node in onnxSession.get_inputs():
-        newElement = dataElement(node.name, node.type, "", shape=str(node.shape) if str(node.shape) != '[]' else '')
-        newElement.value = ''
+        newElement = dataElement(node.name, node.type, str(node.shape))
+        print(node.name, " ", node.type, " ", str(node.shape))
         x.append(newElement)
 
-    for node in onnxSession.get_outputs():
-        newElement = dataElement(name=node.name, dataType=node.type, shape=str(node.shape) if str(node.shape) != '[]' else '')
-        newElement.value = ''
-        y.append(newElement)
+    with open('onnxContent.txt', 'w') as f:
+        f.write('{}'.format(onnx_model))
 
     # Check the model
     try:
@@ -111,24 +108,52 @@ def readONNX(openFileStr):
     except onnx.checker.ValidationError as e:
         print('The model is invalid: %s' % e)
     else:
-        pass
-        
-    return x, y, '-'
+        print('The model is valid!')
+    '''
+    # iterate through inputs of the graph
+    for input in onnx_model.graph.input:
+        print (input.name, end=": ")
+        # get type of input tensor
+        tensor_type = input.type.tensor_type
+        # check if it has a shape:
+        if (tensor_type.HasField("shape")):
+            # iterate through dimensions of the shape:
+            for d in tensor_type.shape.dim:
+                # the dimension may have a definite (integer) value or a symbolic identifier or neither:
+                if (d.HasField("dim_value")):
+                    print (d.dim_value, end=", ")  # known dimension
+                elif (d.HasField("dim_param")):
+                    print (d.dim_param, end=", ")  # unknown dimension with symbolic name
+                else:
+                    print ("?", end=", ")  # unknown dimension with no name
+        else:
+            print ("unknown rank", end="")
+        print()
+    '''
+    #output = onnx_model.graph.output
+    #print(output)
+
+
+''''''
+
+# to do: 判断是pmml类型还是onnx类型
+
 
 # to do: 验证pmml文件有效性
 def readModel(openFileStr):
     if openFileStr[-5:] == '.pmml':
-        return readPMML(openFileStr)
-        '''for xx in x:
+        readPMML(openFileStr)
+        for xx in x:
             print('x: ', xx.name)
         for yy in y:
-            print('y: ', yy.name)'''
+            print('y: ', yy.name)
     elif openFileStr[-5:] == ".onnx":
-        return readONNX(openFileStr)
-        '''for xx in x:
+        readONNX(openFileStr)
+        for xx in x:
             print('x: ', xx.name)
         for yy in y:
-            print('y: ', yy.name)'''
+            print('y: ', yy.name)
     else:
+        print("wrong input file!")
         exit(0)
-    return x, y, '-'
+    return x, y
