@@ -110,10 +110,7 @@ def readONNX(openFileStr):
         y.append(newElement)
 
     # Check the model
-    try:
-        onnx.checker.check_model(onnx_model)
-    except onnx.checker.ValidationError as e:
-        raise RuntimeError(f"ONNX model is not valid: {str(e)}") from e
+    onnx.checker.check_model(onnx_model)
 
     return x, y, '-'
 

@@ -25,8 +25,8 @@ def models():
         modelArgs = request.values.to_dict()
 
         file = request.files.get('file')
-        if file is None:
-            return jsonify({"error": "no file"})
+        if not file:
+            return jsonify({"error": "no file"}), 400
         fileName = secure_filename(file.filename).replace(" ", "")
         filePath = f'{os.path.dirname(__file__)}/upload/{MODELS.nextId}.{fileExtension(fileName)}'
         file.save(filePath)
@@ -34,7 +34,8 @@ def models():
         try:
             input, target, algorithm = readModel(filePath)
         except Exception as e:
-            return jsonify({"error": str(e)})
+            os.remove(filePath)
+            return jsonify({"error": f"model not valid: {e}"}), 400
 
         inputVariables = [{
             "field": ii.name,
@@ -81,7 +82,12 @@ def someModel(id):
             return jsonify({"error": "model not found"}), 404
 
     elif request.method == 'GET':
-        model = MODELS.getModel(id)
+        try:
+            model = MODELS.getModel(id)
+            if not model:
+                return jsonify({"error": "model not found"}), 404
+        except IndexError:
+            return jsonify({"error": "model not found"}), 404
         inputs, target, algorithm = readModel(model.filePath)
         inputVariables = []
         targetVariables = []
@@ -121,10 +127,10 @@ def modelPredict(id):
     # 获取模型
     try:
         mymodel = MODELS.getModel(id)
-        if mymodel is None:
-            raise Exception("模型不存在")
-    except Exception as e:
-        return jsonify({"error": str(e)}), 404
+        if not mymodel:
+            return jsonify({"error": "model not found"}), 404
+    except Exception:
+        return jsonify({"error": "model not found"}), 404
     filePath = mymodel.filePath
 
     # 读取body，获取输入数据
