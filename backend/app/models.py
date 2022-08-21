@@ -144,8 +144,6 @@ def modelPredict(id):
 
     # 利用模型预测
     result = predict(modelFilePath=filePath, type=mymodel.type, data=inputData)
-    # 化为json格式
-    result = {key: result[key] for key in result}
 
     responseData = {"data": {"result": result}}
     return jsonify(responseData)
