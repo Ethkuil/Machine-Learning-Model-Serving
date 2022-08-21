@@ -1,4 +1,3 @@
-import imp
 from flask import Flask
 from flask_cors import CORS
 
@@ -12,6 +11,6 @@ app.config['JSON_AS_ASCII'] = False # 允许中文输出
 
 from app import data
 
-from app import models
-
 data.dataInit()
+
+from app import models # 带有路由的模块

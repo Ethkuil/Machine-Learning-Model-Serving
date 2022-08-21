@@ -1,9 +1,9 @@
 from flask import request, jsonify
 from werkzeug.utils import secure_filename
-from app import app, data
-import datetime
 import os
 import base64
+from app import app
+from .data import MODELS
 from .utils.readModel import readModel
 from .utils.utils import fileExtension
 from .utils.predict import predict
@@ -17,7 +17,7 @@ def models():
             "name": i.name,
             "type": i.type,
             "update_time": i.updateTime
-        } for i in data.modelList]
+        } for i in MODELS.getModels()]
         return_response = {"data": responseData}
         return jsonify(return_response)
 
@@ -25,35 +25,36 @@ def models():
         modelArgs = request.values.to_dict()
 
         file = request.files.get('file')
-        if file is None:
-            return jsonify({"error": "参数不正确"})
+        if not file:
+            return jsonify({"error": "no file"}), 400
         fileName = secure_filename(file.filename).replace(" ", "")
-        filePath = f'{os.path.dirname(__file__)}/upload/{data.dataIndex}.{fileExtension(fileName)}'
+        filePath = f'{os.path.dirname(__file__)}/upload/{MODELS.nextId}.{fileExtension(fileName)}'
         file.save(filePath)
 
-        input, target = readModel(filePath)
-        inputVariables = []
-        for ii in input:
-            inputVars = {
-                "field": ii.name,
-                "data_type": ii.dataType,
-                "op_type": ii.opType
-            }
-            inputVariables.append(inputVars)
-        targetVariables = []
-        for ii in target:
-            targetVars = {
-                "field": ii.name,
-                "data_type": ii.dataType,
-                "op_type": ii.opType
-            }
-            targetVariables.append(targetVars)
+        try:
+            input, target, algorithm = readModel(filePath)
+        except Exception as e:
+            os.remove(filePath)
+            return jsonify({"error": f"model not valid: {e}"}), 400
 
-        mymodel = data.myModel(data.dataIndex, modelArgs['name'],
-                               modelArgs['description'], modelArgs['type'],
-                               filePath, datetime.datetime.now())
-        data.dataIndex += 1
-        data.addModel(mymodel)
+        inputVariables = [{
+            "field": ii.name,
+            "data_type": ii.dataType,
+            "op_type": ii.opType,
+            "shape": ii.shape or "",
+            "value": ii.value or ""
+        } for ii in input]
+
+        targetVariables = [{
+            "field": ii.name,
+            "data_type": ii.dataType,
+            "op_type": ii.opType,
+            "shape": ii.shape or "",
+            "value": ii.value or ""
+        } for ii in target]
+
+        mymodel = MODELS.addModel(modelArgs['name'], modelArgs['description'],
+                                  modelArgs['type'], filePath)
 
         return_response = {
             "data": {
@@ -69,27 +70,74 @@ def models():
         return jsonify(return_response)
 
 
+@app.route('/models/<int:id>', methods=['GET', 'DELETE'])
+def someModel(id):
+    if request.method == 'DELETE':
+        try:
+            if MODELS.deleteModel(id):
+                return jsonify({"data": "success"})
+            else:
+                return jsonify({"error": "model not found"}), 404
+        except IndexError:
+            return jsonify({"error": "model not found"}), 404
+
+    elif request.method == 'GET':
+        try:
+            model = MODELS.getModel(id)
+            if not model:
+                return jsonify({"error": "model not found"}), 404
+        except IndexError:
+            return jsonify({"error": "model not found"}), 404
+        inputs, target, algorithm = readModel(model.filePath)
+        inputVariables = []
+        targetVariables = []
+        for ii in inputs:
+            inputVars = {
+                "field": ii.name,
+                "data_type": ii.dataType,
+                "op_type": ii.opType,
+                "shape": ii.shape,
+                "value": ii.value
+            }
+            inputVariables.append(inputVars)
+        for ii in target:
+            targetVars = {
+                "field": ii.name,
+                "data_type": ii.dataType,
+                "op_type": ii.opType,
+                "shape": ii.shape,
+                "value": ii.value
+            }
+            targetVariables.append(targetVars)
+        response = {
+            "id": model.id,
+            'name': model.name,
+            'type': model.type,
+            "update_time": model.updateTime,
+            'description': model.description,
+            "input_variables": inputVariables,
+            "target_variables": targetVariables,
+            "services": model.services,
+        }
+        return jsonify({'data': response})
+
+
 @app.route('/models/<int:id>/predict', methods=['POST'])
 def modelPredict(id):
     # 获取模型
     try:
-        mymodel = data.getModel(id)
-        if mymodel is None:
-            raise Exception("模型不存在")
-    except Exception as e:
-        response = jsonify({"error": str(e)})
-        response.status_code = 404
-        return response
+        mymodel = MODELS.getModel(id)
+        if not mymodel:
+            return jsonify({"error": "model not found"}), 404
+    except Exception:
+        return jsonify({"error": "model not found"}), 404
     filePath = mymodel.filePath
 
     # 读取body，获取输入数据
     inputData = {}
-    if request.headers.get('Content-Type') == 'multipart/form-data':
-        for key in request.files:
-            inputData[key] = request.files[key]
-        for key in request.form:
-            inputData[key] = request.form[key]
-    elif request.headers.get('Content-Type') == 'application/json':
+    if 'multipart/form-data' in request.content_type:
+        inputData = {**request.form, **request.files}  # 合并表单和文件
+    elif request.content_type == "application/json":
         body = request.json
         for key in body:
             if isinstance(body[key], dict) and body[key]['type'] == 'base64':
@@ -99,12 +147,6 @@ def modelPredict(id):
 
     # 利用模型预测
     result = predict(modelFilePath=filePath, type=mymodel.type, data=inputData)
-    # 化为json格式
-    result = {key: result[key] for key in result}
 
-    responseData = {
-        "data": {
-            "result": result
-        }
-    }
+    responseData = {"data": {"result": result}}
     return jsonify(responseData)
