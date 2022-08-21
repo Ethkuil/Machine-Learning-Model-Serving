@@ -135,12 +135,9 @@ def modelPredict(id):
 
     # 读取body，获取输入数据
     inputData = {}
-    if request.headers.get('Content-Type') == 'multipart/form-data':
-        for key in request.files:
-            inputData[key] = request.files[key]
-        for key in request.form:
-            inputData[key] = request.form[key]
-    elif request.headers.get('Content-Type') == 'application/json':
+    if 'multipart/form-data' in request.content_type:
+        inputData = {**request.form, **request.files}  # 合并表单和文件
+    elif request.content_type == "application/json":
         body = request.json
         for key in body:
             if isinstance(body[key], dict) and body[key]['type'] == 'base64':
