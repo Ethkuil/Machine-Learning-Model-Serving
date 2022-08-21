@@ -14,6 +14,7 @@ class Model:
         self.type = type
         self.filePath = filePath
         self.updateTime = updateTime
+        self.services = []
 
 
 class Models:
@@ -24,6 +25,10 @@ class Models:
 
     def getModel(self, id):
         return self.__models[id]
+
+    def getModels(self):
+        # 不返回空模型
+        return [i for i in self.__models if i]
 
     def addModel(self, name, description, type, filePath):
         """
