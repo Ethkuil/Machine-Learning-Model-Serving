@@ -37,9 +37,6 @@
         <el-tab-pane label="概述" name="overview"></el-tab-pane>
         <el-tab-pane label="部署" name="deploys"></el-tab-pane>
         <el-tab-pane label="测试" name="tests"></el-tab-pane>
-        <el-tab-pane label="实时预测（快速返回）" name="predictions"></el-tab-pane>
-        <el-tab-pane label="批量预测（等待返回）" name="batchPredictions"></el-tab-pane>
-        <el-tab-pane label="关联脚本" name="scripts"></el-tab-pane>
       </el-tabs>
     </el-header>
 
@@ -55,7 +52,6 @@
 import OverviewTab from "../components/modelDetail/OverviewTab.vue";
 import DeployTab from "../components/modelDetail/DeployTab.vue";
 import TestTab from "../components/modelDetail/TestTab.vue";
-import axios from 'axios';
 
 export default {
   data() {

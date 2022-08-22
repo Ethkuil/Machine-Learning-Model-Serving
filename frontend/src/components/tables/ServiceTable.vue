@@ -24,7 +24,7 @@ export default {
   methods: {
     handleDetail(row) {
       this.$router.push({
-        name: 'deployDetail',
+        name: 'serviceDetail',
         params: { id: row.id },
       })
     },

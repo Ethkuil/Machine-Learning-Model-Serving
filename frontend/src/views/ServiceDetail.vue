@@ -5,25 +5,25 @@
     <el-header class="row-bg">
       <el-row type="flex" align="middle" justify="space-between">
         <div>
-          <h3>{{ deploy.name }}</h3>
+          <h3>{{ service.name }}</h3>
         </div>
         <div>
           <el-row class="info" type="flex">
             <el-col>
               <el-row class="label">类别</el-row>
-              <el-row class="content">{{ deploy.category }}</el-row>
+              <el-row class="content">{{ service.category }}</el-row>
             </el-col>
             <el-col>
               <el-row class="label">模型</el-row>
-              <el-row class="content">{{ deploy.model }}</el-row>
+              <el-row class="content">{{ service.model }}</el-row>
             </el-col>
             <el-col>
               <el-row class="label">服务状态</el-row>
-              <el-row class="content">{{ deploy.state }}</el-row>
+              <el-row class="content">{{ service.state }}</el-row>
             </el-col>
             <el-col>
               <el-row class="label">开始时间</el-row>
-              <el-row class="content-time">{{ deploy.start_time }}</el-row>
+              <el-row class="content-time">{{ service.start_time }}</el-row>
             </el-col>
           </el-row>
         </div>
@@ -42,12 +42,12 @@
   </div>
 </template>
 <script>
-import TestTab from "../components/deployDetail/TestTab.vue";
+import TestTab from "../components/serviceDetail/TestTab.vue";
 export default {
   data() {
     return {
       activeName: 'tests',
-      deploy: {
+      service: {
         id: 1,
         name: '部署1',
         category: '网络服务',

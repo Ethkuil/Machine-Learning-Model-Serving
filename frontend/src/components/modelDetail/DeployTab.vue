@@ -13,7 +13,8 @@
           </el-row>
         </el-row>
 
-        <DeployTable :data="deploys.filter(data => data.name.includes(search))" />
+        <ServiceTable :data="services.filter(data => data.name.includes(search))" />
+        <JobTable :data="jobs.filter(data => data.name.includes(search))" />
       </el-card>
     </el-main>
 
@@ -25,19 +26,33 @@
       </div>
     </el-dialog>
 
+    <el-dialog title="添加任务" :visible.sync="dialogAddJobFormVisible">
+      <AddJobForm ref="addJobFormRef" />
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogAddJobFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitAddJobForm()">添 加</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 <script>
-import DeployTable from '../tables/DeployTable.vue';
+import ServiceTable from '../tables/ServiceTable.vue';
+import JobTable from '../tables/JobTable.vue';
 import AddServiceForm from '../forms/AddServiceForm.vue';
+import AddJobForm from '../forms/AddJobForm.vue';
 export default {
   props: {
-    deploys: {
+    services: {
       type: Array,
       default: () => []
-    }
+    },
+    jobs: {
+      type: Array,
+      default: () => []
+    },
   },
-  components: { DeployTable, AddServiceForm },
+  components: { ServiceTable, JobTable, AddServiceForm, AddJobForm },
   data() {
     return {
       title: '部署',
@@ -49,6 +64,9 @@ export default {
   methods: {
     submitAddServiceForm() {
       this.$refs.addServiceFormRef.submitForm();
+    },
+    submitAddJobForm() {
+      this.$refs.addJobFormRef.submitForm();
     },
   },
 }

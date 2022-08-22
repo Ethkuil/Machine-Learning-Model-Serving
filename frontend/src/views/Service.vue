@@ -12,16 +12,16 @@
           </el-row>
         </el-row>
 
-        <DeployTable :data="tableData.filter(data => data.name.includes(search))" />
+        <ServiceTable :data="tableData.filter(data => data.name.includes(search))" />
       </el-card>
     </el-main>
   </div>
 </template>
 <script>
 import TheTabs from '../components/TheTabs.vue'
-import DeployTable from '../components/tables/DeployTable.vue'
+import ServiceTable from '../components/tables/ServiceTable.vue';
 export default {
-  components: { TheTabs, DeployTable },
+  components: { TheTabs, ServiceTable },
   data() {
     return {
       title: this.$route.meta && this.$route.meta.title,
