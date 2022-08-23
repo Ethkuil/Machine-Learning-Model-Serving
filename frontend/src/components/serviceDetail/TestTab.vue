@@ -7,7 +7,6 @@
             <div slot="header">
               <el-row type="flex" justify="space-between" align="middle">
                 <h2 class="card-title">实时预测（快速返回）</h2>
-                <el-button type="text" @click="">生成代码</el-button> <!-- TODO 生成使用curl命令调用REST API的代码 -->
               </el-row>
             </div>
 
@@ -46,18 +45,20 @@ export default {
             "probability_2": "0.2"
           }
         ],
-        "stderr": [],
-        "stdout": []
       },
     }
   },
   methods: {
-    submit() {
-      // TODO 提交JSON
-      this.$message({
-        message: '提交成功',
-        type: 'success'
-      })
+    submit() { // TODO 测试
+      this.$axios.post(`/services/${this.$route.params.id}/predict`, this.inputJson).then(response => {
+        this.outputJson = response.data.data;
+        this.$message({
+          message: '提交成功',
+          type: 'success'
+        })
+      }).catch(error => {
+        this.$message.error(error.response.data.error);
+      });
     }
   }
 }

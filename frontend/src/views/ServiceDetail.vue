@@ -10,12 +10,8 @@
         <div>
           <el-row class="info" type="flex">
             <el-col>
-              <el-row class="label">类别</el-row>
-              <el-row class="content">{{ service.category }}</el-row>
-            </el-col>
-            <el-col>
               <el-row class="label">模型</el-row>
-              <el-row class="content">{{ service.model }}</el-row>
+              <el-row class="content">{{ service.model.name }}</el-row>
             </el-col>
             <el-col>
               <el-row class="label">服务状态</el-row>
@@ -50,20 +46,29 @@ export default {
       service: {
         id: 1,
         name: '部署1',
-        category: '网络服务',
         start_time: '2020-01-01 00:30',
         state: '运行中',
-        model: 'model1',
+        model: {
+          id: 1,
+          name: '模型1',
+          type: 'PMML',
+          update_time: '2020-01-01 00:30'
+        }
       },
     }
   },
   components: {
     TestTab,
   },
-  mounted() {
-    // TODO: 获取部署详情
+  created() {
+    this.getServiceDetail();
   },
   methods: {
+    getServiceDetail() {
+      this.$axios.get(`/services/${this.$route.params.id}`).then(res => {
+        this.service = res.data.data;
+      })
+    },
     goBack() {
       this.$router.go(-1);
     }
