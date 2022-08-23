@@ -12,7 +12,7 @@
           </el-row>
         </el-row>
 
-        <ServiceTable :data="tableData.filter(data => data.name.includes(search))" />
+        <ServiceTable :data="tableData.filter(data => data.name.includes(search))" @refresh="refresh"></ServiceTable>
       </el-card>
     </el-main>
   </div>
@@ -30,25 +30,36 @@ export default {
         {
           id: 1,
           name: '部署1',
-          date: '2017-01-15',
+          start_time: '2017-01-15',
           state: '运行中'
         },
         {
           id: 2,
           name: '部署2',
-          date: '2018-01-03',
+          start_time: '2018-01-03',
           state: '运行中'
         },
         {
           id: 3,
           name: '部署3',
-          date: '2019-06-01',
+          start_time: '2019-06-01',
           state: '运行中'
         },
       ]
     }
   },
+  created() {
+    this.getData();
+  },
   methods: {
+    getData() {
+      this.$axios.get('/services').then(res => {
+        this.tableData = res.data.data;
+      })
+    },
+    refresh() {
+      this.getData();
+    },
     addService() {
       this.$message({
         message: '请选择所需模型',
