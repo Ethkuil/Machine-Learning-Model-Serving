@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import io
 import zipfile
-from .utils import fileExtension, fileToTensor, readCSV
+from .utils import fileExtension, fileToTensorRaw, readCSV
 
 
 def predict(modelFilePath: str, type: str, data: dict):
@@ -83,7 +83,7 @@ def predictDataset(modelFilePath: str, type: str, datasetFilePath: str):
                         result = {"input_file": file}
                         with zip.open(file, 'r') as f:
                             data = {
-                                input_name: fileToTensor('png', f)
+                                input_name: fileToTensorRaw('png', f)
                                 for input_name in input_names
                             }
                         result |= predictONNX(session, data)

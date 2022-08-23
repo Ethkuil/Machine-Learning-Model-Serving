@@ -33,10 +33,10 @@ def fileToTensor(file: object):
     :param file: Flask file对象
     """
     fileType = fileExtension(file.filename)
-    fileToTensor(fileType, file.stream)
+    return fileToTensorRaw(fileType, file.stream)
 
 
-def fileToTensor(fileType, file:object):
+def fileToTensorRaw(fileType, file:object):
     """
     将文件转化为tensor，用于预测
 
