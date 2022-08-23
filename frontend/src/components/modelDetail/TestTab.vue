@@ -75,6 +75,13 @@ export default {
         inputVariable.actual_value = '';
       });
     },
+    handleChange(file, fileList) {
+      this.input_variables.forEach(inputVariable => {
+        if (inputVariable.is_file) {
+          inputVariable.actual_value = file.raw;
+        }
+      });
+    },
     submitJson() {
       this.dialogInputJsonVisible = false;
       this.$axios.post(`/models/${this.$route.params.id}/predict`, this.inputJson, {
@@ -90,11 +97,12 @@ export default {
       });
     },
     submit() {
-      let input = {};
+      let formData = new FormData()
       this.input_variables.forEach(inputVariable => {
-        input[inputVariable.field] = inputVariable.actual_value;
+        formData.append(inputVariable.field, inputVariable.actual_value);
       });
-      this.$axios.post(`/models/${this.$route.params.id}/predict`, input, {
+      console.log("input", formData);
+      this.$axios.post(`/models/${this.$route.params.id}/predict`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
