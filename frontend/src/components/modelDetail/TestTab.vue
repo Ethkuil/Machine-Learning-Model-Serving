@@ -96,7 +96,7 @@ export default {
       });
       this.$axios.post(`/models/${this.$route.params.id}/predict`, input, {
         headers: {
-          'Content-Type': 'multi-part/form-data'
+          'Content-Type': 'multipart/form-data'
         }
       }).then(response => {
         this.outputJson = response.data.data;
