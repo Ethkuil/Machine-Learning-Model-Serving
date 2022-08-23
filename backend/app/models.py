@@ -136,7 +136,13 @@ def modelPredict(id):
     # 读取body，获取输入数据
     inputData = {}
     if 'multipart/form-data' in request.content_type:
-        inputData = {**request.form, **request.files}  # 合并表单和文件
+        # 将字符串转换为Python数据类型
+        # 合并表单和文件
+        inputData = {
+            **{key: eval(value)
+               for key, value in request.form.items()},
+            **request.files
+        }
     elif request.content_type == "application/json":
         body = request.json
         for key in body:
