@@ -50,7 +50,11 @@ export default {
   },
   methods: {
     submit() { // TODO 测试
-      this.$axios.post(`/services/${this.$route.params.id}/predict`, this.inputJson).then(response => {
+      this.$axios.post(`/services/${this.$route.params.id}/predict`, this.inputJson, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => {
         this.outputJson = response.data.data;
         this.$message({
           message: '提交成功',

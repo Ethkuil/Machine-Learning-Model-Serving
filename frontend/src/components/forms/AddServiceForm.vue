@@ -40,7 +40,11 @@ export default {
           name: this.form.name,
           model_id: this.id,
         };
-        this.$axios.post(`/services`, params)
+        this.$axios.post(`/services`, params, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
           .then(res => {
             this.$message({
               type: 'success',

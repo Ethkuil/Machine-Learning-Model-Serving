@@ -59,7 +59,7 @@ export default {
           })
         })
     },
-    handleStart(row) {
+    handleStart(row) { // TODO 测试
       this.$message({
         type: 'info',
         message: '启动中...',
@@ -71,7 +71,7 @@ export default {
         message: '启动成功!',
       })
     },
-    handlePause(row) {
+    handlePause(row) { // TODO 测试
       this.$message({
         type: 'info',
         message: '暂停中...',

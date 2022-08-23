@@ -66,16 +66,7 @@ export default {
     return {
       dialogInputJsonVisible: false,
       inputJson: null,
-      outputJson: {
-        "result": [
-          {
-            "predicted_Species": "0",
-            "probability_0": "0.5",
-            "probability_1": "0.3",
-            "probability_2": "0.2"
-          }
-        ],
-      },
+      outputJson: {},
     }
   },
   methods: {
@@ -84,9 +75,13 @@ export default {
         inputVariable.actual_value = '';
       });
     },
-    submitJson() { // TODO: 测试
+    submitJson() {
       this.dialogInputJsonVisible = false;
-      this.$axios.post(`/models/${this.$route.params.id}/predict`, this.inputJson).then(response => {
+      this.$axios.post(`/models/${this.$route.params.id}/predict`, this.inputJson, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => {
         this.outputJson = response.data.data;
       })
       this.$message({
@@ -94,12 +89,16 @@ export default {
         type: 'success'
       });
     },
-    submit() { // TODO: 测试
+    submit() {
       let input = {};
       this.input_variables.forEach(inputVariable => {
         input[inputVariable.field] = inputVariable.actual_value;
       });
-      this.$axios.post(`/models/${this.$route.params.id}/predict`, input).then(response => {
+      this.$axios.post(`/models/${this.$route.params.id}/predict`, input, {
+        headers: {
+          'Content-Type': 'multi-part/form-data'
+        }
+      }).then(response => {
         this.outputJson = response.data.data;
       })
       this.$message({

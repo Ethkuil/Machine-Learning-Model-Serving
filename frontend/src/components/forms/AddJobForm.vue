@@ -54,7 +54,11 @@ export default {
           model_id: this.id,
           input: this.form.input,
         };
-        this.$axios.post(`/jobs`, params)
+        this.$axios.post(`/jobs`, params, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
           .then(res => {
             this.$message({
               type: 'success',
