@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="data" :default-sort="{ prop: 'start_time', order: 'descending' }" empty-text="没有任何部署">
+  <el-table :data="data" :default-sort="{ prop: 'start_time', order: 'descending' }" empty-text="没有任何服务">
     <!-- id列，提交请求时用 -->
     <el-table-column prop="id" label="id" sortable></el-table-column>
     <el-table-column prop="name" label="名称" sortable></el-table-column>
@@ -9,6 +9,8 @@
       <template slot-scope="scope">
         <el-button type="text" size="small" @click="handleDetail(scope.row)">详情</el-button>
         <el-button type="text" size="small" @click="handleDelete(scope.row)">删除</el-button>
+        <el-button type="text" size="small" @click="handleStart(scope.row)">启动</el-button>
+        <el-button type="text" size="small" @click="handlePause(scope.row)">暂停</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -34,16 +36,51 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        // TODO 删除部署
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        this.$axios.delete(`/services/${row.id}`)
+          .then(() => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            // 令父组件重新请求数据
+            this.$emit('refresh')
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '删除失败!'
+            })
+          })
+      })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
         })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
+    },
+    handleStart(row) {
+      this.$message({
+        type: 'info',
+        message: '启动中...',
+      })
+      this.$axios.post(`/services/${row.id}/start`)
+      this.$emit('refresh')
+      this.$message({
+        type: 'success',
+        message: '启动成功!',
+      })
+    },
+    handlePause(row) {
+      this.$message({
+        type: 'info',
+        message: '暂停中...',
+      })
+      this.$axios.post(`/services/${row.id}/pause`)
+      this.$emit('refresh')
+      this.$message({
+        type: 'success',
+        message: '暂停成功!',
       })
     },
   }
