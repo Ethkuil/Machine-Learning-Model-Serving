@@ -10,7 +10,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 Vue.use(ElementUI)
 
 import axios from 'axios'
-axios.defaults.baseURL = 'http://localhost:8000/'; // Flask API URL
+axios.defaults.baseURL = 'http://localhost:5000/'; // Flask API URL
 Vue.prototype.$axios = axios // 将axios挂载到Vue的原型上，这样所有组件都可以使用this.$axios访问axios
 
 import JSONView from 'vue-json-viewer'
