@@ -18,11 +18,9 @@
       </el-form-item>
 
       <el-form-item label="文件" prop="file">
-        <el-upload drag :limit="1" :action="action" :before-upload="beforeUpload" :on-success="handleUploadSuccess"
-          :on-error="handleUploadError">
-          <i class="el-icon-upload"></i>
-          <div class="el-upload__text">将模型文件拖至此处，或<em>点击上传</em></div>
-          <div class="el-upload__tip" slot="tip">上传的模型文件应与所选类型匹配</div>
+        <el-upload ref="upload" action="nothing" :auto-upload="false" :limit="1" :on-change="handleChange">
+          <el-button type="primary">点击添加</el-button>
+          <div class="el-upload__tip" slot="tip">1. 添加的模型文件应与所选类型匹配；2. 只允许添加一个文件</div>
         </el-upload>
       </el-form-item>
 
@@ -33,13 +31,12 @@
 export default {
   data() {
     return {
-      action: '', // 上传的地址
       formRef: "importModelForm",
       form: {
         name: '',
         description: '',
         type: '',
-        file: '',
+        file: null,
       },
       rules: {
         name: [
@@ -60,31 +57,51 @@ export default {
     }
   },
   methods: {
-    beforeUpload(file) {
+    handleChange(file) {
       if (!this.form.type) {
         this.$message.error('请选择文件类型')
+        this.$refs.upload.clearFiles();
         return false
       }
       const fileName = file.name
       const fileType = fileName.substring(fileName.lastIndexOf('.') + 1).toUpperCase()
       if (fileType !== this.form.type) {
         this.$message.error('文件类型不符合')
+        this.$refs.upload.clearFiles();
         return false
       }
-    },
-    handleUploadError(error) {
-      this.$message.error("上传失败")
-    },
-    // TODO
-    handleUploadSuccess(response, file) {
-      this.form.file = response.data.url
+      this.form.file = file.raw
     },
     submitForm() {
       this.$refs[this.formRef].validate((valid) => {
         if (!valid) {
-          return
+          return false
         }
-        // TODO 整理数据，提交到后台
+        // 整理数据，提交到后台
+        let formData = new FormData()
+        formData.append('name', this.form.name)
+        formData.append('description', this.form.description)
+        formData.append('type', this.form.type)
+        formData.append('file', this.form.file)
+        let config = {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        };
+        this.$axios.post('/models', formData, config)
+          .then(response => {
+            this.$message({
+              message: '模型添加成功',
+              type: 'success'
+            })
+            // 清空表单
+            this.$refs[this.formRef].resetFields()
+            this.$refs.upload.clearFiles();
+          })
+          .catch(error => {
+            this.$message.error(`模型添加失败${error.response.data.error}`)
+          })
+        return true
       })
     }
   },

@@ -12,7 +12,7 @@
           </el-row>
         </el-row>
 
-        <ModelTable :data="models.filter(data => data.name.includes(search))" />
+        <ModelTable :data="models.filter(data => data.name.includes(search))" @refresh="getData" />
       </el-card>
     </el-main>
 
@@ -35,35 +35,28 @@ export default {
     return {
       title: this.$route.meta && this.$route.meta.title,
       search: '',
-      models: [
-        {
-          id: 1,
-          name: '模型1',
-          type: 'PMML',
-          date: '2018-01-15 16:01',
-        },
-        {
-          id: 2,
-          name: '模型2',
-          type: 'ONNX',
-          date: '2018-01-03 16:45',
-        },
-        {
-          id: 3,
-          name: '模型3',
-          type: 'PMML',
-          date: '2019-06-01 12:01',
-        },
-      ],
+      models: [],
       dialogImportModelFormVisible: false,
       formRef: 'importModelFormWithSubmit',
     }
   },
+  created() {
+    this.getData()
+  },
   methods: {
-    submitForm() {
-      this.$refs[this.formRef].submitForm()
+    getData() {
+      this.$axios.get('/models').then(response => {
+        this.models = response.data.data
+      })
     },
-  }
+    submitForm() {
+      if (this.$refs[this.formRef].submitForm()) {
+        this.dialogImportModelFormVisible = false
+        this.getData()
+      }
+    },
+
+  },
 }
 </script>
 <style scoped>
