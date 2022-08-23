@@ -17,7 +17,7 @@
     </el-main>
 
     <el-dialog title="导入模型" :visible.sync="dialogImportModelFormVisible">
-      <ImportModelForm :ref="formRef" />
+      <ImportModelForm :ref="formRef" @submit-success="submitSuccess" />
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogImportModelFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="submitForm()">导 入</el-button>
@@ -50,12 +50,12 @@ export default {
       })
     },
     submitForm() {
-      if (this.$refs[this.formRef].submitForm()) {
-        this.dialogImportModelFormVisible = false
-        this.getData()
-      }
+      this.$refs[this.formRef].submitForm()
     },
-
+    submitSuccess() {
+      this.dialogImportModelFormVisible = false
+      this.getData()
+    }
   },
 }
 </script>

@@ -97,11 +97,11 @@ export default {
             // 清空表单
             this.$refs[this.formRef].resetFields()
             this.$refs.upload.clearFiles();
+            this.$emit('submit-success')
           })
           .catch(error => {
             this.$message.error(`模型添加失败${error.response.data.error}`)
           })
-        return true
       })
     }
   },
