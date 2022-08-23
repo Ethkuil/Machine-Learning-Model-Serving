@@ -5,25 +5,21 @@
     <el-header class="row-bg">
       <el-row type="flex" align="middle" justify="space-between">
         <div>
-          <h3>{{ deploy.name }}</h3>
+          <h3>{{ service.name }}</h3>
         </div>
         <div>
           <el-row class="info" type="flex">
             <el-col>
-              <el-row class="label">类别</el-row>
-              <el-row class="content">{{ deploy.category }}</el-row>
-            </el-col>
-            <el-col>
               <el-row class="label">模型</el-row>
-              <el-row class="content">{{ deploy.model }}</el-row>
+              <el-row class="content">{{ service.model.name }}</el-row>
             </el-col>
             <el-col>
               <el-row class="label">服务状态</el-row>
-              <el-row class="content">{{ deploy.state }}</el-row>
+              <el-row class="content">{{ service.state }}</el-row>
             </el-col>
             <el-col>
               <el-row class="label">开始时间</el-row>
-              <el-row class="content-time">{{ deploy.start_time }}</el-row>
+              <el-row class="content-time">{{ service.start_time }}</el-row>
             </el-col>
           </el-row>
         </div>
@@ -42,28 +38,37 @@
   </div>
 </template>
 <script>
-import TestTab from "../components/deployDetail/TestTab.vue";
+import TestTab from "../components/serviceDetail/TestTab.vue";
 export default {
   data() {
     return {
       activeName: 'tests',
-      deploy: {
+      service: {
         id: 1,
         name: '部署1',
-        category: '网络服务',
         start_time: '2020-01-01 00:30',
         state: '运行中',
-        model: 'model1',
+        model: {
+          id: 1,
+          name: '模型1',
+          type: 'PMML',
+          update_time: '2020-01-01 00:30'
+        }
       },
     }
   },
   components: {
     TestTab,
   },
-  mounted() {
-    // TODO: 获取部署详情
+  created() {
+    this.getServiceDetail();
   },
   methods: {
+    getServiceDetail() {
+      this.$axios.get(`/services/${this.$route.params.id}`).then(res => {
+        this.service = res.data.data;
+      })
+    },
     goBack() {
       this.$router.go(-1);
     }
