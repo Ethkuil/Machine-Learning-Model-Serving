@@ -5,7 +5,7 @@ import base64
 from app import app
 from .data import MODELS
 from .utils.readModel import readModel
-from .utils.utils import fileExtension
+from .utils.utils import fileExtension, fileToTensor
 from .utils.predict import predict
 
 
@@ -136,12 +136,14 @@ def modelPredict(id):
     # 读取body，获取输入数据
     inputData = {}
     if 'multipart/form-data' in request.content_type:
-        # 将字符串转换为Python数据类型
         # 合并表单和文件
         inputData = {
+            # 将字符串转换为供预测用的值
             **{key: eval(value)
                for key, value in request.form.items()},
-            **request.files
+            # 将文件转换为供预测用的值
+            **{key: fileToTensor(file)
+               for key, file in request.files.items()}
         }
     elif request.content_type == "application/json":
         body = request.json
