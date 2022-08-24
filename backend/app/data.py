@@ -48,6 +48,10 @@ class Models:
         if model := self.__models[id]:
             os.remove(model.filePath)
             self.__models[id] = None
+            # 删除模型时，删除该模型下的所有服务和任务
+            # TODO: 删除服务
+            for jobId in model.jobs:
+                JOBS.deleteJob(jobId)
             return True
         else:
             return False
@@ -92,6 +96,7 @@ class Jobs:
                   None)
         self.nextId += 1
         self.__jobs.append(job)
+        MODELS.getModel(modelId).jobs.append(job.id)
         return job
 
     def deleteJob(self, id):
@@ -100,6 +105,7 @@ class Jobs:
         """
         if job := self.__jobs[id]:
             self.__jobs[id] = None
+            MODELS.getModel(job.modelId).jobs.remove(job.id)
             return True
         else:
             return False

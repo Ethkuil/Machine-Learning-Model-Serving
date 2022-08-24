@@ -4,7 +4,7 @@ import os
 import base64
 
 from app import app
-from app.data import MODELS
+from app.data import MODELS, JOBS
 from app.utils.readModel import readModel
 from app.utils.utils import fileExtension, fileToTensor, fileToTensorRaw
 from app.utils.predict import predict
@@ -59,13 +59,20 @@ def models():
 
         return_response = {
             "data": {
-                "id": mymodel.id,
-                "name": mymodel.name,
-                "type": mymodel.type,
-                "update_time": mymodel.updateTime,
-                "description": mymodel.description,
-                "input_variables": inputVariables,
-                "target_variables": targetVariables
+                "id":
+                mymodel.id,
+                "name":
+                mymodel.name,
+                "type":
+                mymodel.type,
+                "update_time":
+                mymodel.updateTime,
+                "description":
+                mymodel.description,
+                "input_variables":
+                inputVariables,
+                "target_variables":
+                targetVariables,
             }
         }
         return jsonify(return_response)
@@ -111,14 +118,28 @@ def someModel(id):
             }
             targetVariables.append(targetVars)
         response = {
-            "id": model.id,
-            'name': model.name,
-            'type': model.type,
-            "update_time": model.updateTime,
-            'description': model.description,
-            "input_variables": inputVariables,
-            "target_variables": targetVariables,
-            "services": model.services,
+            "id":
+            model.id,
+            'name':
+            model.name,
+            'type':
+            model.type,
+            "update_time":
+            model.updateTime,
+            'description':
+            model.description,
+            "input_variables":
+            inputVariables,
+            "target_variables":
+            targetVariables,
+            "services":
+            model.services,
+            "jobs": [{
+                "id": JOBS.getJob(i).id,
+                "name": JOBS.getJob(i).name,
+                "start_time": JOBS.getJob(i).startTime,
+                "state": JOBS.getJob(i).state
+            } for i in model.jobs],
         }
         return jsonify({'data': response})
 
