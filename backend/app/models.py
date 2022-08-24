@@ -4,7 +4,7 @@ import os
 import base64
 
 from app import app
-from app.data import MODELS, JOBS
+from app.data import MODELS, SERVICES, JOBS
 from app.utils.readModel import readModel
 from app.utils.utils import fileExtension, fileToTensor, fileToTensorRaw
 from app.utils.predict import predict
@@ -59,20 +59,13 @@ def models():
 
         return_response = {
             "data": {
-                "id":
-                mymodel.id,
-                "name":
-                mymodel.name,
-                "type":
-                mymodel.type,
-                "update_time":
-                mymodel.updateTime,
-                "description":
-                mymodel.description,
-                "input_variables":
-                inputVariables,
-                "target_variables":
-                targetVariables,
+                "id": mymodel.id,
+                "name": mymodel.name,
+                "type": mymodel.type,
+                "update_time": mymodel.updateTime,
+                "description": mymodel.description,
+                "input_variables": inputVariables,
+                "target_variables": targetVariables,
             }
         }
         return jsonify(return_response)
@@ -132,8 +125,12 @@ def someModel(id):
             inputVariables,
             "target_variables":
             targetVariables,
-            "services":
-            model.services,
+            "services": [{
+                "id": SERVICES.getService(i).id,
+                "name": SERVICES.getService(i).name,
+                "start_time": SERVICES.getService(i).startTime,
+                "state": SERVICES.getService(i).state
+            } for i in model.services],
             "jobs": [{
                 "id": JOBS.getJob(i).id,
                 "name": JOBS.getJob(i).name,
