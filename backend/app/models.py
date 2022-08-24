@@ -5,7 +5,7 @@ import base64
 from app import app
 from .data import MODELS
 from .utils.readModel import readModel
-from .utils.utils import fileExtension, fileToTensor
+from .utils.utils import fileExtension, fileToTensor, fileToTensorRaw
 from .utils.predict import predict
 
 
@@ -149,7 +149,8 @@ def modelPredict(id):
         body = request.json
         for key in body:
             if isinstance(body[key], dict) and body[key]['type'] == 'base64':
-                inputData[key] = base64.b64decode(body[key]['value'])
+                inputData[key] = fileToTensorRaw(
+                    'png', base64.b64decode(body[key]['value']))
             else:
                 inputData[key] = body[key]
 

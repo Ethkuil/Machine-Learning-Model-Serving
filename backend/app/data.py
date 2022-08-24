@@ -15,6 +15,7 @@ class Model:
         self.filePath = filePath
         self.updateTime = updateTime
         self.services = []
+        self.jobs = []
 
 
 class Models:
@@ -52,7 +53,86 @@ class Models:
             return False
 
 
+class Job:
+
+    def __init__(
+        self,
+        id,
+        name,
+        startTime,
+        state,
+        modelId,
+        resultFilePath,
+    ):
+        self.id = id
+        self.name = name
+        self.startTime = startTime
+        self.state = state
+        self.modelId = modelId
+        self.resultFilePath = resultFilePath
+
+
+class Jobs:
+
+    def __init__(self):
+        self.__jobs = []
+        self.nextId = 0
+
+    def getJob(self, id):
+        return self.__jobs[id]
+
+    def getJobs(self):
+        return [i for i in self.__jobs if i]
+
+    def addJob(self, name, modelId):
+        """
+        :return: 所添加的任务变量
+        """
+        job = Job(self.nextId, name, datetime.datetime.now(), "启动中", modelId,
+                  None)
+        self.nextId += 1
+        self.__jobs.append(job)
+        return job
+
+    def deleteJob(self, id):
+        """
+        :return: True, 若正确删除；False, 若任务不存在
+        """
+        if job := self.__jobs[id]:
+            self.__jobs[id] = None
+            return True
+        else:
+            return False
+
+    def updateJob(self, id, state, resultFilePath):
+        """
+        :param resultFilePath: 当state为"完成"时，resultFilePath为结果文件的路径
+        :return: True, 若正确更新；False, 若任务不存在
+        """
+        if job := self.__jobs[id]:
+            job.state = state
+            job.resultFilePath = resultFilePath
+            return True
+        else:
+            return False
+
+    def deleteJobs(self, id):
+        """
+        :return: True, 若正确删除；False, 若任务不存在
+        """
+        if job := self.__jobs[id]:
+            self.__jobs[id] = None
+            return True
+        else:
+            return False
+
+    def deleteJobs(self):
+        self.__jobs = []
+
+
 def dataInit():
     # 全局变量命名规范：全大写，下划线分割
     global MODELS
     MODELS = Models()
+    global JOBS
+    JOBS = Jobs()
