@@ -49,9 +49,59 @@ class Models:
             os.remove(model.filePath)
             self.__models[id] = None
             # 删除模型时，删除该模型下的所有服务和任务
-            # TODO: 删除服务
+            for serviceId in model.services:
+                SERVICES.deleteService(serviceId)
             for jobId in model.jobs:
                 JOBS.deleteJob(jobId)
+            return True
+        else:
+            return False
+
+
+class Service:
+
+    def __init__(self, id, name, startTime, state, modelId):
+        self.id = id
+        self.name = name
+        self.startTime = startTime
+        self.state = state
+        self.modelId = modelId
+
+
+class Services:
+
+    def __init__(self):
+        self.__services = []
+        self.nextId = 0
+
+    def getService(self, id):
+        return self.__services[id]
+
+    def getServices(self):
+        return [i for i in self.__services if i]
+
+    def addService(self, name, modelId):
+        service = Service(self.nextId, name, datetime.datetime.now(), '启动中',
+                          modelId)
+        self.nextId += 1
+        self.__services.append(service)
+        MODELS.getModel(modelId).services.append(service.id)
+        return service
+
+    def deleteService(self, id):
+        if service := self.__services[id]:
+            self.__services[id] = None
+            MODELS.getModel(service.modelId).services.remove(id)
+            return True
+        else:
+            return False
+
+    def updateService(self, id, state):
+        if service := self.__services[id]:
+            oldState = service.state
+            service.state = state
+            if oldState == "暂停中" and oldState != state:
+                service.startTime = datetime.datetime.now()
             return True
         else:
             return False
@@ -105,7 +155,7 @@ class Jobs:
         """
         if job := self.__jobs[id]:
             self.__jobs[id] = None
-            MODELS.getModel(job.modelId).jobs.remove(job.id)
+            MODELS.getModel(job.modelId).jobs.remove(id)
             return True
         else:
             return False
@@ -122,16 +172,6 @@ class Jobs:
         else:
             return False
 
-    def deleteJobs(self, id):
-        """
-        :return: True, 若正确删除；False, 若任务不存在
-        """
-        if job := self.__jobs[id]:
-            self.__jobs[id] = None
-            return True
-        else:
-            return False
-
     def deleteJobs(self):
         self.__jobs = []
 
@@ -140,5 +180,7 @@ def dataInit():
     # 全局变量命名规范：全大写，下划线分割
     global MODELS
     MODELS = Models()
+    global SERVICES
+    SERVICES = Services()
     global JOBS
     JOBS = Jobs()

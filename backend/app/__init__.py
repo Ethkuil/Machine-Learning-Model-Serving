@@ -15,4 +15,5 @@ data.dataInit()
 
 # 带有路由的模块需导入，否则无法访问
 from app import models
+from app import services
 from app import jobs
