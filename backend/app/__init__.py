@@ -13,4 +13,6 @@ from app import data
 
 data.dataInit()
 
-from app import models # 带有路由的模块
+# 带有路由的模块需导入，否则无法访问
+from app import models
+from app import jobs

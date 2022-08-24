@@ -7,6 +7,10 @@ def fileExtension(fileName):
     return fileName.rsplit('.', 1)[1].lower()
 
 
+def fileNameWithoutExtension(fileName):
+    return fileName.rsplit('.', 1)[0]
+
+
 def readCSV(filePath: str):
     """
     读取csv文件，返回字典列表
@@ -36,7 +40,7 @@ def fileToTensor(file: object):
     return fileToTensorRaw(fileType, file.stream)
 
 
-def fileToTensorRaw(fileType, file:object):
+def fileToTensorRaw(fileType, file: object):
     """
     将文件转化为tensor，用于预测
 
