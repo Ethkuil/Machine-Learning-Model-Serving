@@ -23,16 +23,17 @@ export default {
   },
   methods: {
     handleDownload(row) {
-      // TODO. 尚未测试
-      this.$axios.get(`/jobs/${row.id}/download`, { responseType: 'blob' })
+      this.$axios.get(`/jobs/${row.id}/download`)
         .then(response => {
           const blob = new Blob([response.data], { type: 'application/octet-stream' });
           const link = document.createElement('a');
           link.href = window.URL.createObjectURL(blob);
           // 从header中获取文件名
           let contentDisposition = response.headers['content-disposition'];
+          console.log(contentDisposition);
+          console.log(response.headers);
           const fileName = contentDisposition && contentDisposition.split('filename=')[1];
-          link.download = fileName || 'result.csv';
+          link.download = fileName;
           link.click();
         })
     },

@@ -84,4 +84,6 @@ def download(id):
         rv = send_file(path, as_attachment=True)
         rv.headers['Content-Disposition'] = 'attachment; filename={}'.format(
             fileName)
+        rv.headers[
+            'Access-Control-Expose-Headers'] = 'Content-Disposition'  # 解决跨域问题
         return rv
