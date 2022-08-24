@@ -18,14 +18,6 @@
               <el-row class="label">类型</el-row>
               <el-row class="content">{{ model.type }}</el-row>
             </el-col>
-            <el-col>
-              <el-row class="label">算法</el-row>
-              <el-row class="content">{{ model.algorithm }}</el-row>
-            </el-col>
-            <el-col>
-              <el-row class="label">引擎</el-row>
-              <el-row class="content">{{ model.engine }}</el-row>
-            </el-col>
           </el-row>
         </div>
       </el-row>
@@ -37,16 +29,14 @@
         <el-tab-pane label="概述" name="overview"></el-tab-pane>
         <el-tab-pane label="部署" name="deploys"></el-tab-pane>
         <el-tab-pane label="测试" name="tests"></el-tab-pane>
-        <el-tab-pane label="实时预测（快速返回）" name="predictions"></el-tab-pane>
-        <el-tab-pane label="批量预测（等待返回）" name="batchPredictions"></el-tab-pane>
-        <el-tab-pane label="关联脚本" name="scripts"></el-tab-pane>
       </el-tabs>
     </el-header>
 
-    <OverviewTab v-if="activeName == 'overview'" :inputVariablesData="model.inputVariablesData"
-      :targetVariablesData="model.targetVariablesData" />
-    <DeployTab v-if="activeName == 'deploys'" :deploys="model.deploys" />
-    <TestTab v-if="activeName == 'tests'" :inputVariablesData="model.inputVariablesData" />
+    <OverviewTab v-if="activeName == 'overview'" :input_variables="model.input_variables"
+      :target_variables="model.target_variables" />
+    <DeployTab v-if="activeName == 'deploys'" :id="id" :services="model.services" :jobs="model.jobs"
+      @refresh="getModelDetail" />
+    <TestTab v-if="activeName == 'tests'" :input_variables="model.input_variables" />
 
 
   </div>
@@ -55,34 +45,43 @@
 import OverviewTab from "../components/modelDetail/OverviewTab.vue";
 import DeployTab from "../components/modelDetail/DeployTab.vue";
 import TestTab from "../components/modelDetail/TestTab.vue";
-import axios from 'axios';
 
 export default {
+  components: { OverviewTab, DeployTab, TestTab },
   data() {
     return {
+      // id是integer类型
+      id: parseInt(this.$route.params.id),
       activeName: 'overview',
       model: {
         name: "example-model",
         description: "这是一个示例模型",
         update_time: "2020-01-01 16:01",
         type: "PMML",
-        algorithm: "MiningModel(classification)",
-        engine: "PyPMML",
-        inputVariablesData: [],
-        deploys: [],
-        tests: [],
-        predictions: [],
-        batchPredictions: [],
-        scripts: [],
+        input_variables: [],
+        target_variables: [],
+        services: [],
+        jobs: []
       }
     };
+  },
+  created() {
+    this.getModelDetail();
   },
   methods: {
     goBack() {
       this.$router.go(-1);
     },
+    getModelDetail() {
+      this.$axios.get(`/models/${this.$route.params.id}`)
+        .then(res => {
+          this.model = res.data.data;
+        })
+        .catch(err => {
+          this.$message.error(err.response.data.error);
+        });
+    }
   },
-  components: { OverviewTab, DeployTab, TestTab }
 }
 </script>
 <style scoped>

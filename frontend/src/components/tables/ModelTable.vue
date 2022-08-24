@@ -34,11 +34,21 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        // TODO: 删除模型
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
+        this.$axios.delete(`/models/${row.id}`)
+          .then(() => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            // 令父组件重新请求数据
+            this.$emit('refresh')
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '删除失败!'
+            })
+          })
       }).catch(() => {
         this.$message({
           type: 'info',

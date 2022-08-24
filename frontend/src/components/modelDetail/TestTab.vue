@@ -11,13 +11,19 @@
               </el-row>
             </div>
             <el-form>
-              <template v-for="(inputVariable, index) in inputVariablesData">
+              <template v-for="(input_variable, index) in input_variables">
                 <el-form-item prop="inputVariable.value">
                   <template slot="label">
-                    <span class="label">{{ inputVariable.field }}</span>
+                    <span class="label">{{ input_variable.field }}</span>
                   </template>
-                  <el-input v-model="inputVariable.value" :placeholder="inputVariable.type">
+                  <el-checkbox v-model="input_variable.is_file">文件</el-checkbox>
+                  <el-input v-if="!input_variable.is_file" v-model="input_variable.actual_value"
+                    :placeholder="input_variable.data_type">
                   </el-input>
+                  <!-- 不自动上传 -->
+                  <el-upload v-else action="nothing" :auto-upload="false" :on-change="handleChange">
+                    <el-button type="primary" icon="el-icon-upload2"></el-button>
+                  </el-upload>
                 </el-form-item>
               </template>
             </el-form>
@@ -32,7 +38,7 @@
           <el-input type="textarea" v-model="inputJson" :rows="15" :placeholder="'请输入JSON'"></el-input>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogInputJsonVisible = false">取 消</el-button>
-            <el-button type="primary" @click="submitJsonStr()">提 交</el-button>
+            <el-button type="primary" @click="submitJson()">提 交</el-button>
           </div>
         </el-dialog>
 
@@ -51,7 +57,7 @@
 <script>
 export default {
   props: {
-    inputVariablesData: {
+    input_variables: {
       type: Array,
       default: () => []
     }
@@ -60,42 +66,53 @@ export default {
     return {
       dialogInputJsonVisible: false,
       inputJson: null,
-      outputJson: {
-        "result": [
-          {
-            "predicted_Species": "0",
-            "probability_0": "0.5",
-            "probability_1": "0.3",
-            "probability_2": "0.2"
-          }
-        ],
-        "stderr": [],
-        "stdout": []
-      },
+      outputJson: {},
     }
   },
   methods: {
     clearInputVariables() {
-      this.inputVariablesData.forEach(inputVariable => {
-        inputVariable.value = '';
+      this.input_variables.forEach(inputVariable => {
+        inputVariable.actual_value = '';
+      });
+    },
+    handleChange(file, fileList) {
+      this.input_variables.forEach(inputVariable => {
+        if (inputVariable.is_file) {
+          inputVariable.actual_value = file.raw;
+        }
       });
     },
     submitJson() {
-      // TODO: 提交inputJson
-      // 从后端获取输出的JSON
+      this.dialogInputJsonVisible = false;
+      this.$axios.post(`/models/${this.$route.params.id}/predict`, this.inputJson, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => {
+        this.outputJson = response.data.data;
+      })
       this.$message({
         message: '提交成功！',
         type: 'success'
       });
     },
-    submitJsonStr() {
-      this.dialogInputJsonVisible = false;
-      // TODO: 可能需要从字符串转换为json对象
-      this.submitJson();
-    },
     submit() {
-      // TODO: 提交由inputVariablesData部分内容得到的JSON
-      this.submitJson();
+      let formData = new FormData()
+      this.input_variables.forEach(inputVariable => {
+        formData.append(inputVariable.field, inputVariable.actual_value);
+      });
+      console.log("input", formData);
+      this.$axios.post(`/models/${this.$route.params.id}/predict`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(response => {
+        this.outputJson = response.data.data;
+      })
+      this.$message({
+        message: '提交成功！',
+        type: 'success'
+      });
     }
   }
 }
