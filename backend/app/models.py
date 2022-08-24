@@ -2,11 +2,12 @@ from flask import request, jsonify
 from werkzeug.utils import secure_filename
 import os
 import base64
+
 from app import app
-from .data import MODELS
-from .utils.readModel import readModel
-from .utils.utils import fileExtension, fileToTensor, fileToTensorRaw
-from .utils.predict import predict
+from app.data import MODELS
+from app.utils.readModel import readModel
+from app.utils.utils import fileExtension, fileToTensor, fileToTensorRaw
+from app.utils.predict import predict
 
 
 @app.route('/models', methods=['POST', 'GET'])

@@ -1,8 +1,13 @@
-from urllib import response
-from app import app
-from flask import request, jsonify
+from flask import request, jsonify, send_file
+from werkzeug.utils import secure_filename
 
-from .data import JOBS
+import os
+from threading import Thread
+
+from app import app
+from app.data import JOBS
+from app.utils.utils import fileExtension, fileNameWithoutExtension
+from app.deploy.jobs import deployJob
 
 
 @app.route('/jobs', methods=['GET', 'POST'])
@@ -18,15 +23,19 @@ def jobs():
 
     elif request.method == 'POST':
         name = request.form.get('name')
-        modelId = request.form.get('model_id')
-        if not name or not modelId:
-            return jsonify({'error': 'name or model_id is missing'}), 400
-        # TODO: 添加任务
-        # 新开1个线程，运行任务。相关代码新建个deploy文件夹放置，是部署时要拖进容器的。
+        modelId = eval(request.form.get('model_id'))
+        dataset = request.files.get('input')
 
-        # 任务成功添加后
-        job = JOBS.addJob(name, modelId)
-        return jsonify({"data": {"id": job.id}})
+        fileName = secure_filename(dataset.filename).replace(" ", "")
+        datasetFilePath = f'{os.path.dirname(__file__)}/upload/{fileNameWithoutExtension(fileName)}.{JOBS.nextId}.{fileExtension(fileName)}'
+        dataset.save(datasetFilePath)
+
+        jobId = JOBS.addJob(name, modelId).id
+
+        # 新开1个线程执行任务
+        Thread(target=deployJob, args=(jobId, datasetFilePath)).start()
+
+        return jsonify({"data": {"id": jobId}})
 
 
 @app.route('/jobs/<int:id>', methods=['GET', 'DELETE'])
@@ -50,7 +59,7 @@ def job(id):
             'name': job.name,
             'start_time': job.startTime,
             'state': job.state,
-            'model': job.model,
+            'model_id': job.modelId,
         }
         return jsonify({'data': responseData})
 
@@ -64,8 +73,15 @@ def download(id):
                 return jsonify({"error": "job not found"}), 404
         except IndexError:
             return jsonify({"error": "job not found"}), 404
-        if job.state != 'success':
+
+        if job.state != '成功':
             return jsonify({"error": "job not finished"}), 404
-        # TODO: 添加下载文件的逻辑
-        # 返回二进制文件. application/octet-stream
+
         path = job.resultFilePath
+        fileName = os.path.basename(path)
+        fileName = fileNameWithoutExtension(fileNameWithoutExtension(
+            fileName)) + '_result.' + fileExtension(fileName)
+        rv = send_file(path, as_attachment=True)
+        rv.headers['Content-Disposition'] = 'attachment; filename={}'.format(
+            fileName)
+        return rv

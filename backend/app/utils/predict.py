@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import io
 import zipfile
-from .utils import fileExtension, fileToTensorRaw, readCSV
+from app.utils.utils import fileExtension, fileToTensorRaw, readCSV
 
 
 def predict(modelFilePath: str, type: str, data: dict):

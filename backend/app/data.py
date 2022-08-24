@@ -104,14 +104,14 @@ class Jobs:
         else:
             return False
 
-    def updateJob(self, id, state, resultFilePath):
+    def updateJob(self, id, state=None, resultFilePath=None):
         """
-        :param resultFilePath: 当state为"完成"时，resultFilePath为结果文件的路径
+        :param resultFilePath: 当state为"成功"时，resultFilePath为结果文件的路径
         :return: True, 若正确更新；False, 若任务不存在
         """
         if job := self.__jobs[id]:
-            job.state = state
-            job.resultFilePath = resultFilePath
+            if state: job.state = state
+            job.resultFilePath = resultFilePath if resultFilePath and state == "成功" else None
             return True
         else:
             return False

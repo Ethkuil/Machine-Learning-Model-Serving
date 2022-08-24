@@ -1,5 +1,5 @@
 import re
-from .utils import fileExtension
+from app.utils.utils import fileExtension
 
 class dataElement():
 
