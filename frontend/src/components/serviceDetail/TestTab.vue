@@ -40,7 +40,7 @@ export default {
     }
   },
   methods: {
-    submit() { // TODO 测试
+    submit() {
       this.$axios.post(`/services/${this.$route.params.id}/predict`, this.inputJson, {
         headers: {
           'Content-Type': 'application/json'
