@@ -95,3 +95,4 @@ def predictDataset(modelFilePath: str, type: str, datasetFilePath: str):
                 for result in results:
                     f.write(','.join([str(value)
                                       for value in result.values()]) + '\n')
+            return resultFilePath
