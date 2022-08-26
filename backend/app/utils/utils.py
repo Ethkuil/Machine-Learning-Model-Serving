@@ -45,6 +45,7 @@ def fileToTensorRaw(fileType, file: object):
     将文件转化为tensor，用于预测
 
     :param file: 必须实现了file.read()方法
+      二进制数据可先使用io.BytesIO()包装成BytesIO对象
     """
     # 检测文件类型
     if fileType == 'png':

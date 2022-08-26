@@ -2,6 +2,7 @@ from flask import request, jsonify
 from werkzeug.utils import secure_filename
 import os
 import base64
+from io import BytesIO
 
 from app import app
 from app.data import MODELS, SERVICES, JOBS
@@ -165,11 +166,12 @@ def modelPredict(id):
                for key, file in request.files.items()}
         }
     elif request.content_type == "application/json":
+        print("application/json")
         body = request.json
         for key in body:
             if isinstance(body[key], dict) and body[key]['type'] == 'base64':
-                inputData[key] = fileToTensorRaw(
-                    'png', base64.b64decode(body[key]['value']))
+                imageData = base64.b64decode(body[key]['value'])
+                inputData[key] = fileToTensorRaw('png', BytesIO(imageData))
             else:
                 inputData[key] = body[key]
 
