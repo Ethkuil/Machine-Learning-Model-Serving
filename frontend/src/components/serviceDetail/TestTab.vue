@@ -36,16 +36,7 @@ export default {
   data() {
     return {
       inputJson: '',
-      outputJson: {
-        "result": [
-          {
-            "predicted_Species": "0",
-            "probability_0": "0.5",
-            "probability_1": "0.3",
-            "probability_2": "0.2"
-          }
-        ],
-      },
+      outputJson: {},
     }
   },
   methods: {

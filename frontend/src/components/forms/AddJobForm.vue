@@ -2,7 +2,7 @@
   <div>
     <el-form :model="form" :ref="formRef" :rules="rules">
 
-      <el-form-item label="服务名称" prop="name">
+      <el-form-item label="任务名称" prop="name">
         <el-input v-model="form.name"></el-input>
       </el-form-item>
 
@@ -31,7 +31,7 @@ export default {
       },
       rules: {
         name: [
-          { required: true, message: '请输入服务名称', trigger: 'blur' },
+          { required: true, message: '请输入任务名称', trigger: 'blur' },
           { max: 20, message: '长度在 1 到 20 个字符', trigger: 'blur' },
         ],
         input: [
