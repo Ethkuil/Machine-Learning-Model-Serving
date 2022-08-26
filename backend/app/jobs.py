@@ -22,20 +22,23 @@ def jobs():
         return jsonify({'data': responseData})
 
     elif request.method == 'POST':
-        name = request.form.get('name')
-        modelId = eval(request.form.get('model_id'))
-        dataset = request.files.get('input')
+        try:
+            name = request.form.get('name')
+            modelId = eval(request.form.get('model_id'))
+            dataset = request.files.get('input')
 
-        fileName = secure_filename(dataset.filename).replace(" ", "")
-        datasetFilePath = f'{os.path.dirname(__file__)}/upload/{fileNameWithoutExtension(fileName)}.{JOBS.nextId}.{fileExtension(fileName)}'
-        dataset.save(datasetFilePath)
+            fileName = secure_filename(dataset.filename).replace(" ", "")
+            datasetFilePath = f'{os.path.dirname(__file__)}/upload/{fileNameWithoutExtension(fileName)}.{JOBS.nextId}.{fileExtension(fileName)}'
+            dataset.save(datasetFilePath)
 
-        jobId = JOBS.addJob(name, modelId).id
+            jobId = JOBS.addJob(name, modelId).id
 
-        # 新开1个线程执行任务
-        Thread(target=deployJob, args=(jobId, datasetFilePath)).start()
+            # 新开1个线程执行任务
+            Thread(target=deployJob, args=(jobId, datasetFilePath)).start()
 
-        return jsonify({"data": {"id": jobId}})
+            return jsonify({"data": {"id": jobId}})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
 
 
 @app.route('/jobs/<int:id>', methods=['GET', 'DELETE'])
@@ -75,7 +78,7 @@ def download(id):
             return jsonify({"error": "job not found"}), 404
 
         if job.state != '成功':
-            return jsonify({"error": "job not finished"}), 404
+            return jsonify({"error": "job not finished"}), 400
 
         path = job.resultFilePath
         fileName = os.path.basename(path)

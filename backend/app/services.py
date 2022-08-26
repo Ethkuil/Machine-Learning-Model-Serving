@@ -22,30 +22,36 @@ def services():
         } for service in SERVICES.getServices()]
         return jsonify({'data': responseData})
     elif request.method == 'POST':
-        body = request.json
-        name = body['name']
-        modelId = body['model_id']
+        try:
+            body = request.json
+            name = body['name']
+            modelId = body['model_id']
 
-        service = SERVICES.addService(name, modelId)
-        model = MODELS.getModel(modelId)
+            model = MODELS.getModel(modelId)
+            service = SERVICES.addService(name, modelId)
 
-        # 新开1个线程执行任务
-        Thread(target=deployService, args=(service.id, model.filePath)).start()
+            # 新开1个线程执行任务
+            Thread(target=deployService,
+                   args=(service.id, model.filePath)).start()
 
-        return jsonify({
-            "data": {
-                "id": service.id,
-                "name": service.name,
-                "start_time": service.startTime,
-                "state": service.state,
-                "model": {
-                    "id": model.id,
-                    "name": model.name,
-                    "type": model.type,
-                    "update_time": model.updateTime,
+            return jsonify({
+                "data": {
+                    "id": service.id,
+                    "name": service.name,
+                    "start_time": service.startTime,
+                    "state": service.state,
+                    "model": {
+                        "id": model.id,
+                        "name": model.name,
+                        "type": model.type,
+                        "update_time": model.updateTime,
+                    }
                 }
-            }
-        })
+            })
+        except IndexError:
+            return jsonify({"error": "model not found"}), 400
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
 
 
 @app.route('/services/<int:id>', methods=['GET', 'DELETE'])
@@ -100,31 +106,28 @@ def service_pause(id):
 
 @app.route('/services/<int:id>/predict', methods=['POST'])
 def service_predict(id):
-    service = SERVICES.getService(id)
+    try:
+        service = SERVICES.getService(id)
+        if not service:
+            return jsonify({"error": "service not found"}), 404
+    except IndexError:
+        return jsonify({"error": "service not found"}), 404
     if service.state != '运行中':
-        return jsonify({"error": "service not running"}), 404
+        return jsonify({"error": "service not running"}), 400
 
     # 获取模型
-    modelId = service.modelId
-    try:
-        mymodel = MODELS.getModel(modelId)
-        if not mymodel:
-            return jsonify({"error": "model not found"}), 404
-    except Exception:
-        return jsonify({"error": "model not found"}), 404
-    filePath = mymodel.filePath
+    model = MODELS.getModel(service.modelId)
 
     # 读取body，获取输入数据
     inputData = {}
     if 'multipart/form-data' in request.content_type:
         # 合并表单和文件
         inputData = {
-            # 将字符串转换为供预测用的值
-            **{key: eval(value)
-               for key, value in request.form.items()},
-            # 将文件转换为供预测用的值
-            **{key: fileToTensor(file)
-               for key, file in request.files.items()}
+            key: eval(value)  # 将字符串转换为供预测用的值
+            for key, value in request.form.items()
+        } | {
+            key: fileToTensor(file)  # 将文件转换为供预测用的值
+            for key, file in request.files.items()
         }
     elif request.content_type == "application/json":
         body = request.json
@@ -136,7 +139,9 @@ def service_predict(id):
                 inputData[key] = body[key]
 
     # 利用模型预测
-    result = predict(modelFilePath=filePath, type=mymodel.type, data=inputData)
+    result = predict(modelFilePath=model.filePath,
+                     type=model.type,
+                     data=inputData)
 
     responseData = {"data": {"result": result}}
     return jsonify(responseData)
