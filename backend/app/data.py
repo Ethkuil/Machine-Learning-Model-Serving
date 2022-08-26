@@ -91,7 +91,8 @@ class Services:
     def deleteService(self, id):
         if service := self.__services[id]:
             self.__services[id] = None
-            MODELS.getModel(service.modelId).services.remove(id)
+            if model := MODELS.getModel(service.modelId):
+                model.services.remove(id)
             return True
         else:
             return False
@@ -158,7 +159,8 @@ class Jobs:
             if job.state == "成功":
                 os.remove(job.resultFilePath)
             self.__jobs[id] = None
-            MODELS.getModel(job.modelId).jobs.remove(id)
+            if model := MODELS.getModel(job.modelId):
+                model.jobs.remove(id)
             return True
         else:
             return False
