@@ -31,8 +31,6 @@ export default {
           link.href = window.URL.createObjectURL(blob);
           // 从header中获取文件名
           let contentDisposition = response.headers['content-disposition'];
-          console.log(contentDisposition);
-          console.log(response.headers);
           const fileName = contentDisposition && contentDisposition.split('filename=')[1];
           link.download = fileName;
           link.click();

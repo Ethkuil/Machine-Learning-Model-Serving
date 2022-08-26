@@ -101,7 +101,6 @@ export default {
       this.input_variables.forEach(inputVariable => {
         formData.append(inputVariable.field, inputVariable.actual_value);
       });
-      console.log("input", formData);
       this.$axios.post(`/models/${this.$route.params.id}/predict`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
