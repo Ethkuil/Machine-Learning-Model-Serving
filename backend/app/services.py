@@ -1,14 +1,12 @@
 from flask import request, jsonify
 
 from threading import Thread
-import base64
 
 from app import app
 from app.data import SERVICES, MODELS
 from app.deploy.services import deployService
-
 from app.utils.predict import predict
-from app.utils.utils import fileToTensor, fileToTensorRaw
+from app.utils.preprocess_api_input import base64ToTensor, mergeFormDataAndFile
 
 
 @app.route('/services', methods=['POST', 'GET'])
@@ -31,8 +29,7 @@ def services():
             service = SERVICES.addService(name, modelId)
 
             # 新开1个线程执行任务
-            Thread(target=deployService,
-                   args=(service.id, model.filePath)).start()
+            Thread(target=deployService, args=(service.id, model.id)).start()
 
             return jsonify({
                 "data": {
@@ -121,20 +118,12 @@ def service_predict(id):
     # 读取body，获取输入数据
     inputData = {}
     if 'multipart/form-data' in request.content_type:
-        # 合并表单和文件
-        inputData = {
-            key: eval(value)  # 将字符串转换为供预测用的值
-            for key, value in request.form.items()
-        } | {
-            key: fileToTensor(file)  # 将文件转换为供预测用的值
-            for key, file in request.files.items()
-        }
+        inputData = mergeFormDataAndFile(request.form, request.files)
     elif request.content_type == "application/json":
         body = request.json
         for key in body:
             if isinstance(body[key], dict) and body[key]['type'] == 'base64':
-                inputData[key] = fileToTensorRaw(
-                    'png', base64.b64decode(body[key]['value']))
+                inputData[key] = base64ToTensor(body[key]['value'])
             else:
                 inputData[key] = body[key]
 

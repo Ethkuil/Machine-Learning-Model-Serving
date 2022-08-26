@@ -1,14 +1,13 @@
 from flask import request, jsonify
 from werkzeug.utils import secure_filename
 import os
-import base64
-from io import BytesIO
 
 from app import app
 from app.data import MODELS, SERVICES, JOBS
 from app.utils.readModel import readModel
-from app.utils.utils import fileExtension, fileToTensor, fileToTensorRaw
+from app.utils.utils import fileExtension
 from app.utils.predict import predict
+from app.utils.preprocess_api_input import base64ToTensor, mergeFormDataAndFile
 
 
 @app.route('/models', methods=['POST', 'GET'])
@@ -156,22 +155,12 @@ def modelPredict(id):
     # 读取body，获取输入数据
     inputData = {}
     if 'multipart/form-data' in request.content_type:
-        # 合并表单和文件
-        inputData = {
-            # 将字符串转换为供预测用的值
-            **{key: eval(value)
-               for key, value in request.form.items()},
-            # 将文件转换为供预测用的值
-            **{key: fileToTensor(file)
-               for key, file in request.files.items()}
-        }
+        inputData = mergeFormDataAndFile(request)
     elif request.content_type == "application/json":
-        print("application/json")
         body = request.json
         for key in body:
             if isinstance(body[key], dict) and body[key]['type'] == 'base64':
-                imageData = base64.b64decode(body[key]['value'])
-                inputData[key] = fileToTensorRaw('png', BytesIO(imageData))
+                inputData[key] = base64ToTensor(body[key]['value'])
             else:
                 inputData[key] = body[key]
 
