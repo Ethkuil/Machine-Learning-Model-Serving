@@ -9,6 +9,7 @@
       <template slot-scope="scope">
         <el-button v-if="scope.row.state == '成功'" type="text" size="small" @click="handleDownload(scope.row)">下载结果
         </el-button>
+        <el-button type="text" size="small" @click="handleDelete(scope.row)">删除</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -35,6 +36,35 @@ export default {
           const fileName = contentDisposition && contentDisposition.split('filename=')[1];
           link.download = fileName;
           link.click();
+        })
+    },
+    handleDelete(row) {
+      this.$confirm('确定删除该任务吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$axios.delete(`/jobs/${row.id}`)
+          .then(() => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            // 令父组件重新请求数据
+            this.$emit('refresh')
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '删除失败!'
+            })
+          })
+      })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
         })
     },
   }
