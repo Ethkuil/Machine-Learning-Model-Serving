@@ -6,7 +6,7 @@
         <el-row slot="header" type="flex" justify="space-between" align="middle">
           <h3 class="title">{{ title }}</h3>
           <el-row type="flex">
-            <el-button icon="el-icon-plus" @click="addService">添加部署</el-button>
+            <el-button icon="el-icon-plus" @click="addService">添加任务</el-button>
             <el-input v-model="search" placeholder="搜索任务名" suffix-icon="el-icon-search" style="margin-left: 20px">
             </el-input>
           </el-row>
