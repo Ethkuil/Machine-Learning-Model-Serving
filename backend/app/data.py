@@ -154,6 +154,9 @@ class Jobs:
         :return: True, 若正确删除；False, 若任务不存在
         """
         if job := self.__jobs[id]:
+            # 删除任务时，删除结果文件
+            if job.state == "成功":
+                os.remove(job.resultFilePath)
             self.__jobs[id] = None
             MODELS.getModel(job.modelId).jobs.remove(id)
             return True

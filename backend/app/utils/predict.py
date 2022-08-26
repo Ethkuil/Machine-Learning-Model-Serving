@@ -5,6 +5,7 @@ import onnxruntime as rt
 import numpy as np
 import pandas as pd
 import io
+import os
 import zipfile
 from app.utils.utils import fileExtension, fileToTensorRaw, readCSV
 
@@ -54,8 +55,6 @@ def predictDataset(modelFilePath: str, type: str, datasetFilePath: str):
             result = model.predict(data)
             resultFilePath = datasetFilePath.replace('.csv', '_result.csv')
             result.to_csv(resultFilePath, index=False),
-            return resultFilePath
-
     elif type.upper() == 'ONNX':
         session = rt.InferenceSession(modelFilePath)
         if fileExtension(datasetFilePath) == 'csv':
@@ -69,7 +68,6 @@ def predictDataset(modelFilePath: str, type: str, datasetFilePath: str):
                 for result in results:
                     f.write(','.join([str(value)
                                       for value in result.values()]) + '\n')
-            return resultFilePath
         elif fileExtension(datasetFilePath) == 'zip':
             # 获取输入变量名
             input_names = [x.name for x in session.get_inputs()]
@@ -95,4 +93,7 @@ def predictDataset(modelFilePath: str, type: str, datasetFilePath: str):
                 for result in results:
                     f.write(','.join([str(value)
                                       for value in result.values()]) + '\n')
-            return resultFilePath
+        else:
+            raise Exception('数据集格式不支持')
+    os.remove(datasetFilePath)
+    return resultFilePath
